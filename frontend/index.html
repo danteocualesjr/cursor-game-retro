@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codequest: Hoot's Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="title">CODEQUEST</div>
+        <div class="subtitle">Hoot the Owl needs your code!</div>
+        <div class="level-pills" id="levelPills"></div>
+      </header>
+
+      <main class="stage">
+        <section class="game-pane">
+          <canvas id="game" width="512" height="384"></canvas>
+          <div class="hud">
+            <div class="objective" id="objective">Loading...</div>
+            <div class="status" id="status"></div>
+          </div>
+          <div class="hoot" id="hoot" hidden>
+            <div class="hoot-bubble" id="hootBubble"></div>
+            <div class="hoot-sprite" aria-hidden="true">
+              <span class="hoot-eye left"></span>
+              <span class="hoot-eye right"></span>
+              <span class="hoot-beak"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="code-pane">
+          <div class="code-header">
+            <span class="cmds-label">Available commands:</span>
+            <span class="cmds-list" id="cmdsList"></span>
+          </div>
+          <div id="editor" class="editor"></div>
+          <div class="controls">
+            <button id="runBtn" class="btn btn-primary">RUN</button>
+            <button id="resetBtn" class="btn">RESET</button>
+            <button id="hintBtn" class="btn btn-hint">HINT</button>
+            <button id="muteBtn" class="btn btn-mute" aria-label="Toggle sound">SOUND ON</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        Built with Cursor SDK. Code carefully, brave hero.
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
