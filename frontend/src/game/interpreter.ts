@@ -477,6 +477,12 @@ async function runStmt(stmt: Stmt, ctx: RunContext): Promise<void> {
 }
 
 async function runCall(stmt: Extract<Stmt, { kind: "call" }>, ctx: RunContext) {
+  const result = await runCallInner(stmt, ctx);
+  ctx.onStep?.();
+  return result;
+}
+
+async function runCallInner(stmt: Extract<Stmt, { kind: "call" }>, ctx: RunContext) {
   const { world, engine } = ctx;
   switch (stmt.name) {
     case "move": {

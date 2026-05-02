@@ -154,6 +154,7 @@ async function runProgram() {
       world,
       engine,
       signal: ctrl.signal,
+      onStep: () => hud.setSteps(world.steps),
     });
     if (result.win) {
       onWin();

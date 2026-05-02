@@ -5,12 +5,18 @@ export class Hud {
   private status: HTMLElement;
   private cmds: HTMLElement;
   private pillBox: HTMLElement;
+  private stepsBox: HTMLElement;
+  private stepsValue: HTMLElement;
+  private bumpTimer: number | null = null;
+  private lastSteps = 0;
 
   constructor() {
     this.objective = mustEl("#objective");
     this.status = mustEl("#status");
     this.cmds = mustEl("#cmdsList");
     this.pillBox = mustEl("#levelPills");
+    this.stepsBox = mustEl("#steps");
+    this.stepsValue = mustEl("#stepsValue");
   }
 
   setLevel(level: LevelSpec) {
@@ -19,6 +25,28 @@ export class Hud {
     )}`;
     this.cmds.textContent = level.allowedCommands.join(", ");
     this.setStatus("");
+    this.setSteps(0);
+  }
+
+  setSteps(n: number) {
+    if (n === this.lastSteps) {
+      this.stepsValue.textContent = String(n);
+      return;
+    }
+    const grew = n > this.lastSteps;
+    this.lastSteps = n;
+    this.stepsValue.textContent = String(n);
+    if (grew) {
+      this.stepsBox.classList.remove("bumped");
+      // Force a reflow so the animation restarts on rapid increments.
+      void this.stepsBox.offsetWidth;
+      this.stepsBox.classList.add("bumped");
+      if (this.bumpTimer) window.clearTimeout(this.bumpTimer);
+      this.bumpTimer = window.setTimeout(() => {
+        this.stepsBox.classList.remove("bumped");
+        this.bumpTimer = null;
+      }, 250);
+    }
   }
 
   setStatus(text: string, kind: "" | "good" | "bad" = "") {

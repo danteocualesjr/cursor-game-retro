@@ -25,7 +25,13 @@
           <canvas id="game" width="512" height="384"></canvas>
           <div class="hud">
             <div class="objective" id="objective">Loading...</div>
-            <div class="status" id="status"></div>
+            <div class="hud-side">
+              <div class="steps" id="steps" title="Hero actions used so far">
+                <span class="steps-label">STEPS</span>
+                <span class="steps-value" id="stepsValue">0</span>
+              </div>
+              <div class="status" id="status"></div>
+            </div>
           </div>
           <div class="hoot" id="hoot" hidden>
             <div class="hoot-bubble" id="hootBubble"></div>
