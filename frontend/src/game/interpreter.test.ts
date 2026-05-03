@@ -254,4 +254,42 @@ describe("execute", () => {
     expect(res.win).toBe(false);
     expect(res.message).toMatch(/stop/i);
   });
+
+  it("aborts mid-run inside a long move(n) without finishing the walk", async () => {
+    const world = buildWorld(
+      level(
+        ["W W W W W W W W W W", "W H . . . . . . . W", "W W W W W W W W W W"].join("\n"),
+        { kind: "reach", x: 8, y: 1 },
+      ),
+    );
+    const ctrl = new AbortController();
+    let stepCount = 0;
+    // Custom engine that aborts the signal after the second step's animation.
+    const aborter: Engine = {
+      animateMove: () => {
+        stepCount++;
+        if (stepCount === 2) ctrl.abort();
+        return Promise.resolve();
+      },
+      animateTurn: () => Promise.resolve(),
+      animateBump: () => Promise.resolve(),
+      animatePickup: () => Promise.resolve(),
+      animatePush: () => Promise.resolve(),
+      animateAttack: () => Promise.resolve(),
+      animateDefeat: () => Promise.resolve(),
+      animatePause: () => Promise.resolve(),
+      setSpeed: () => undefined,
+      setWorld: () => undefined,
+    } as unknown as Engine;
+    const res = await execute(parse("move(7);"), {
+      world,
+      engine: aborter,
+      signal: ctrl.signal,
+    });
+    expect(res.win).toBe(false);
+    expect(res.message).toMatch(/stop/i);
+    // Hero made 2 steps before STOP, not all 7.
+    expect(world.hero.x).toBeLessThan(8);
+    expect(stepCount).toBeLessThanOrEqual(3);
+  });
 });

@@ -79,7 +79,13 @@ hud.setLevel(world.level);
 muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
 muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
 
-runBtn.addEventListener("click", () => runProgram());
+runBtn.addEventListener("click", () => {
+  if (runAbort) {
+    stopProgram();
+  } else {
+    runProgram();
+  }
+});
 resetBtn.addEventListener("click", () => resetLevel());
 hintBtn.addEventListener("click", () => askHoot());
 speedBtn.addEventListener("click", () => cycleSpeed());
@@ -88,7 +94,12 @@ muteBtn.addEventListener("click", () => toggleMute());
 window.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
-    runProgram();
+    if (runAbort) stopProgram();
+    else runProgram();
+  }
+  if (e.key === "Escape" && runAbort) {
+    e.preventDefault();
+    stopProgram();
   }
 });
 
@@ -259,10 +270,22 @@ function onWin() {
 }
 
 function setRunning(running: boolean) {
-  runBtn.disabled = running;
-  resetBtn.disabled = running;
+  // RUN button doubles as STOP while a program is in flight, so it stays
+  // enabled - the click handler routes to runProgram() vs stopProgram().
+  runBtn.disabled = false;
+  runBtn.classList.toggle("running", running);
+  runBtn.classList.toggle("btn-primary", !running);
+  runBtn.classList.toggle("btn-stop", running);
+  runBtn.textContent = running ? "STOP" : "RUN";
+  runBtn.setAttribute("aria-label", running ? "Stop running program" : "Run program");
   editor.setEditable(!running);
-  runBtn.textContent = running ? "RUNNING" : "RUN";
+}
+
+function stopProgram() {
+  if (runAbort) {
+    runAbort.abort();
+    hud.setStatus("Stopped.", "");
+  }
 }
 
 function trimMessage(msg: string): string {

@@ -591,6 +591,7 @@ async function runCallInner(stmt: Extract<Stmt, { kind: "call" }>, ctx: RunConte
 }
 
 async function stepForward(line: number, ctx: RunContext) {
+  if (ctx.signal.aborted) throw new CancelSignal();
   const { world, engine } = ctx;
   const { dx, dy } = delta(world.hero.dir);
   const tx = world.hero.x + dx;

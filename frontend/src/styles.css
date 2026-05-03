@@ -568,6 +568,18 @@ body {
   border-color: var(--c-accent);
 }
 
+.btn-stop {
+  background: var(--c-bad);
+  color: var(--c-bg-deep);
+  border-color: var(--c-bad);
+  animation: btn-stop-pulse 900ms ease-in-out infinite;
+}
+
+@keyframes btn-stop-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 85, 119, 0.0); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 85, 119, 0.35); }
+}
+
 .btn-hint {
   background: var(--c-hoot);
   color: var(--c-bg-deep);
