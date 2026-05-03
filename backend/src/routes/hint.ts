@@ -1,31 +1,20 @@
 import type { Request, Response } from "express";
 import { TtlCache, SessionRateLimiter } from "../cache.js";
 import { getHint, type TutorOutput } from "../tutor.js";
+import { formatZodErrors, hintBodySchema } from "../schemas.js";
 
 const cache = new TtlCache<TutorOutput>(10 * 60 * 1000);
 const limiter = new SessionRateLimiter(5_000);
 
-interface HintBody {
-  levelId?: number;
-  levelName?: string;
-  intro?: string;
-  allowedCommands?: string[];
-  code?: string;
-  lastError?: { line: number; message: string };
-}
-
 export async function hintHandler(req: Request, res: Response) {
-  const body = req.body as HintBody;
-  if (
-    typeof body.levelId !== "number" ||
-    typeof body.code !== "string" ||
-    typeof body.levelName !== "string" ||
-    typeof body.intro !== "string" ||
-    !Array.isArray(body.allowedCommands)
-  ) {
-    res.status(400).json({ error: "Bad request shape." });
+  const parsed = hintBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res
+      .status(400)
+      .json({ error: "Bad request shape.", details: formatZodErrors(parsed.error) });
     return;
   }
+  const body = parsed.data;
 
   const sessionId = (req.header("x-session-id") || req.ip || "anon").toString();
   const wait = limiter.check(sessionId);

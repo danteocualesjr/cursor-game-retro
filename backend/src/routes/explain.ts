@@ -2,28 +2,20 @@ import type { Request, Response } from "express";
 import { TtlCache, SessionRateLimiter } from "../cache.js";
 import { getErrorExplanation, type TutorOutput } from "../tutor.js";
 import { LEVELS } from "../levels.js";
+import { explainBodySchema, formatZodErrors } from "../schemas.js";
 
 const cache = new TtlCache<TutorOutput>(10 * 60 * 1000);
 const limiter = new SessionRateLimiter(3_000);
 
-interface ExplainBody {
-  levelId?: number;
-  code?: string;
-  errorLine?: number;
-  errorMessage?: string;
-}
-
 export async function explainHandler(req: Request, res: Response) {
-  const body = req.body as ExplainBody;
-  if (
-    typeof body.levelId !== "number" ||
-    typeof body.code !== "string" ||
-    typeof body.errorLine !== "number" ||
-    typeof body.errorMessage !== "string"
-  ) {
-    res.status(400).json({ error: "Bad request shape." });
+  const parsed = explainBodySchema.safeParse(req.body);
+  if (!parsed.success) {
+    res
+      .status(400)
+      .json({ error: "Bad request shape.", details: formatZodErrors(parsed.error) });
     return;
   }
+  const body = parsed.data;
 
   const lvl = LEVELS.find((l) => l.id === body.levelId);
   if (!lvl) {
