@@ -46,6 +46,7 @@ export class Engine {
   defeatFlashes: { x: number; y: number; t0: number }[] = [];
   speed = 1; // multiplier
   private rafId = 0;
+  private resizeObserver: ResizeObserver | null = null;
 
   constructor(canvas: HTMLCanvasElement, world: World) {
     this.canvas = canvas;
@@ -56,6 +57,7 @@ export class Engine {
     this.resize();
     this.loop = this.loop.bind(this);
     this.rafId = requestAnimationFrame(this.loop);
+    this.observeContainer();
   }
 
   setWorld(world: World) {
@@ -72,6 +74,48 @@ export class Engine {
 
   destroy() {
     cancelAnimationFrame(this.rafId);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+  }
+
+  private observeContainer() {
+    if (typeof ResizeObserver === "undefined") return;
+    const parent = this.canvas.parentElement;
+    if (!parent) return;
+    this.resizeObserver = new ResizeObserver(() => this.snapToIntegerScale());
+    this.resizeObserver.observe(parent);
+    this.snapToIntegerScale();
+  }
+
+  /**
+   * Lock the canvas's CSS size to the largest integer multiple of its
+   * intrinsic pixel size that fits its container. Combined with the CSS
+   * `image-rendering: pixelated`, this guarantees every game pixel maps
+   * to a whole number of physical pixels, eliminating the fuzzy tile
+   * edges you get from a fractional scale.
+   */
+  private snapToIntegerScale() {
+    const parent = this.canvas.parentElement;
+    if (!parent) return;
+    const intrinsicW = this.canvas.width;
+    if (intrinsicW <= 0) return;
+    const styles = getComputedStyle(parent);
+    const padX =
+      parseFloat(styles.paddingLeft || "0") +
+      parseFloat(styles.paddingRight || "0");
+    const available = Math.max(0, parent.clientWidth - padX);
+    if (available < intrinsicW) {
+      // Container is narrower than one game pixel each. Fall back to
+      // letting CSS scale - still pixelated, but may be fractional.
+      this.canvas.style.width = "100%";
+      this.canvas.style.height = "auto";
+      return;
+    }
+    const scale = Math.max(1, Math.floor(available / intrinsicW));
+    const cssW = intrinsicW * scale;
+    const cssH = this.canvas.height * scale;
+    this.canvas.style.width = `${cssW}px`;
+    this.canvas.style.height = `${cssH}px`;
   }
 
   private resize() {
@@ -81,6 +125,7 @@ export class Engine {
       this.canvas.width = w;
       this.canvas.height = h;
     }
+    this.snapToIntegerScale();
   }
 
   /** Animate the hero stepping forward one tile. The world.hero coords are
