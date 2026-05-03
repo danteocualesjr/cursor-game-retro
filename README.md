@@ -1,5 +1,7 @@
 # Codequest: Hoot's Adventure
 
+[![CI](https://github.com/danteocualesjr/cursor-game-retro/actions/workflows/ci.yml/badge.svg)](https://github.com/danteocualesjr/cursor-game-retro/actions/workflows/ci.yml)
+
 A retro pixel-art coding game for kids (ages 8-12) where you write tiny lines of
 code to guide a hero through grid-based puzzles. When you get stuck, **Hoot the
 Owl** swoops in with a hint - powered by a real Cursor agent running on the
