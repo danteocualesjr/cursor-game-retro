@@ -77,6 +77,7 @@ let lastError: { line: number; message: string } | null = null;
 renderHud();
 hud.setLevel(world.level);
 muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
+muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
 
 runBtn.addEventListener("click", () => runProgram());
 resetBtn.addEventListener("click", () => resetLevel());
@@ -316,6 +317,7 @@ async function askHootForError() {
 function toggleMute() {
   audio.setMuted(!audio.muted);
   muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
+  muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
 }
 
 function loadSpeed(): Speed {
@@ -323,6 +325,14 @@ function loadSpeed(): Speed {
     const raw = localStorage.getItem(SPEED_KEY);
     const n = raw ? Number(raw) : NaN;
     if (SPEEDS.includes(n as Speed)) return n as Speed;
+  } catch {
+    /* ignore */
+  }
+  // Honor the OS-level reduced-motion preference: default to fast.
+  try {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      return 4;
+    }
   } catch {
     /* ignore */
   }

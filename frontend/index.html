@@ -21,19 +21,31 @@
       </header>
 
       <main class="stage">
-        <section class="game-pane">
-          <canvas id="game" width="512" height="384"></canvas>
+        <section class="game-pane" aria-label="Game world">
+          <canvas
+            id="game"
+            width="512"
+            height="384"
+            role="img"
+            aria-label="Pixel-art puzzle grid showing the hero, gems, crates, and obstacles."
+          ></canvas>
           <div class="hud">
-            <div class="objective" id="objective">Loading...</div>
+            <div class="objective" id="objective" aria-live="polite">Loading...</div>
             <div class="hud-side">
-              <div class="steps" id="steps" title="Hero actions used so far">
-                <span class="steps-label">STEPS</span>
+              <div class="steps" id="steps" title="Hero actions used so far" aria-label="Steps taken">
+                <span class="steps-label" aria-hidden="true">STEPS</span>
                 <span class="steps-value" id="stepsValue">0</span>
               </div>
-              <div class="status" id="status"></div>
+              <div
+                class="status"
+                id="status"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              ></div>
             </div>
           </div>
-          <div class="hoot" id="hoot" hidden>
+          <div class="hoot" id="hoot" hidden aria-live="polite">
             <div class="hoot-bubble" id="hootBubble"></div>
             <div class="hoot-sprite" aria-hidden="true">
               <span class="hoot-eye left"></span>
@@ -43,18 +55,23 @@
           </div>
         </section>
 
-        <section class="code-pane">
+        <section class="code-pane" aria-label="Code editor and controls">
           <div class="code-header">
-            <span class="cmds-label">Available commands:</span>
-            <span class="cmds-list" id="cmdsList"></span>
+            <span class="cmds-label" aria-hidden="true">Available commands:</span>
+            <span class="cmds-list" id="cmdsList" aria-label="Commands available on this level"></span>
           </div>
-          <div id="editor" class="editor"></div>
+          <div id="editor" class="editor" aria-label="Code editor (Ctrl+Enter to run)"></div>
           <div class="controls">
-            <button id="runBtn" class="btn btn-primary">RUN</button>
+            <button id="runBtn" class="btn btn-primary" aria-keyshortcuts="Control+Enter Meta+Enter">RUN</button>
             <button id="resetBtn" class="btn">RESET</button>
             <button id="hintBtn" class="btn btn-hint">HINT</button>
-            <button id="speedBtn" class="btn btn-speed" aria-label="Cycle animation speed" title="Cycle animation speed (1x / 2x / 4x)">1x</button>
-            <button id="muteBtn" class="btn btn-mute" aria-label="Toggle sound">SOUND ON</button>
+            <button
+              id="speedBtn"
+              class="btn btn-speed"
+              aria-label="Cycle animation speed"
+              title="Cycle animation speed (1x / 2x / 4x)"
+            >1x</button>
+            <button id="muteBtn" class="btn btn-mute" aria-label="Toggle sound" aria-pressed="false">SOUND ON</button>
           </div>
         </section>
       </main>
