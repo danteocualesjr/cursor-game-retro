@@ -113,6 +113,7 @@ function selectLevel(id: number) {
   world = buildWorld(levelById(id));
   engine.setWorld(world);
   editor.setCode(loadCode(id));
+  editor.setExecutingLine(null);
   hud.setLevel(world.level);
   hoot.hide();
   lastError = null;
@@ -123,7 +124,9 @@ function resetLevel() {
   if (runAbort) runAbort.abort();
   world = buildWorld(levelById(currentLevelId));
   engine.setWorld(world);
+  editor.setExecutingLine(null);
   hud.setStatus("Level reset.", "");
+  hud.setSteps(0);
   hoot.hide();
   lastError = null;
 }
@@ -162,6 +165,7 @@ async function runProgram() {
       engine,
       signal: ctrl.signal,
       onStep: () => hud.setSteps(world.steps),
+      onLine: (line) => editor.setExecutingLine(line),
     });
     if (result.win) {
       onWin();
@@ -182,6 +186,7 @@ async function runProgram() {
   } finally {
     setRunning(false);
     runAbort = null;
+    editor.setExecutingLine(null);
   }
 }
 

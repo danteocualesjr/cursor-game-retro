@@ -384,6 +384,7 @@ export interface RunContext {
   engine: Engine;
   signal: AbortSignal;
   onStep?: () => void;
+  onLine?: (line: number) => void;
 }
 
 export interface RunResult {
@@ -436,6 +437,7 @@ async function runStmt(stmt: Stmt, ctx: RunContext): Promise<void> {
       stmt.line,
     );
   }
+  ctx.onLine?.(stmt.line);
 
   switch (stmt.kind) {
     case "call":
