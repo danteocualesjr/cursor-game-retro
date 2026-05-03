@@ -10,6 +10,9 @@ import { explainError, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
 const CODE_KEY = (id: number) => `codequest:code:${id}`;
+const SPEED_KEY = "codequest:speed";
+const SPEEDS = [1, 2, 4] as const;
+type Speed = (typeof SPEEDS)[number];
 
 interface Progress {
   solved: number[];
@@ -39,6 +42,7 @@ const editorEl = document.getElementById("editor") as HTMLElement;
 const runBtn = document.getElementById("runBtn") as HTMLButtonElement;
 const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const hintBtn = document.getElementById("hintBtn") as HTMLButtonElement;
+const speedBtn = document.getElementById("speedBtn") as HTMLButtonElement;
 const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 
 const hud = new Hud();
@@ -49,6 +53,8 @@ let currentLevelId = progress.current;
 let world = buildWorld(levelById(currentLevelId));
 const engine = new Engine(canvas, world);
 const editor = new CodeEditor(editorEl, loadCode(currentLevelId));
+let speed: Speed = loadSpeed();
+applySpeed(speed);
 
 let runAbort: AbortController | null = null;
 let lastError: { line: number; message: string } | null = null;
@@ -59,6 +65,7 @@ hud.setLevel(world.level);
 runBtn.addEventListener("click", () => runProgram());
 resetBtn.addEventListener("click", () => resetLevel());
 hintBtn.addEventListener("click", () => askHoot());
+speedBtn.addEventListener("click", () => cycleSpeed());
 muteBtn.addEventListener("click", () => toggleMute());
 
 window.addEventListener("keydown", (e) => {
@@ -268,6 +275,35 @@ async function askHootForError() {
 function toggleMute() {
   audio.setMuted(!audio.muted);
   muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
+}
+
+function loadSpeed(): Speed {
+  try {
+    const raw = localStorage.getItem(SPEED_KEY);
+    const n = raw ? Number(raw) : NaN;
+    if (SPEEDS.includes(n as Speed)) return n as Speed;
+  } catch {
+    /* ignore */
+  }
+  return 1;
+}
+
+function applySpeed(s: Speed) {
+  speed = s;
+  engine.setSpeed(s);
+  speedBtn.textContent = `${s}x`;
+  speedBtn.classList.toggle("fast", s === 2);
+  speedBtn.classList.toggle("faster", s === 4);
+  try {
+    localStorage.setItem(SPEED_KEY, String(s));
+  } catch {
+    /* ignore */
+  }
+}
+
+function cycleSpeed() {
+  const i = SPEEDS.indexOf(speed);
+  applySpeed(SPEEDS[(i + 1) % SPEEDS.length]);
 }
 
 // Pre-flight: hide Hoot until first interaction.

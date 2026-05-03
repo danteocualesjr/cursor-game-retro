@@ -422,7 +422,7 @@ body {
 
 .controls {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto auto;
   gap: 8px;
 }
 
@@ -469,6 +469,25 @@ body {
   background: var(--c-bg-deep);
   font-size: 9px;
   padding: 12px 10px;
+}
+
+.btn-speed {
+  background: var(--c-panel-light);
+  font-size: 11px;
+  padding: 12px 10px;
+  min-width: 48px;
+}
+
+.btn-speed.fast {
+  background: var(--c-accent-2);
+  color: var(--c-bg-deep);
+  border-color: var(--c-accent-2);
+}
+
+.btn-speed.faster {
+  background: var(--c-bad);
+  color: var(--c-bg-deep);
+  border-color: var(--c-bad);
 }
 
 /* ---------- FOOTER ---------- */
