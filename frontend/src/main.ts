@@ -76,6 +76,7 @@ let lastError: { line: number; message: string } | null = null;
 
 renderHud();
 hud.setLevel(world.level);
+muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
 
 runBtn.addEventListener("click", () => runProgram());
 resetBtn.addEventListener("click", () => resetLevel());

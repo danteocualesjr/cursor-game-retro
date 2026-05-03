@@ -8,10 +8,20 @@
 
 type Wave = "square" | "triangle" | "sawtooth" | "sine";
 
+const MUTE_KEY = "codequest:muted";
+
+function readMutedFromStorage(): boolean {
+  try {
+    return localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 class ChiptuneAudio {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
-  muted = false;
+  muted = readMutedFromStorage();
 
   ensure() {
     if (this.ctx) return;
@@ -31,6 +41,11 @@ class ChiptuneAudio {
 
   setMuted(muted: boolean) {
     this.muted = muted;
+    try {
+      localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
   }
 
   private beep(
