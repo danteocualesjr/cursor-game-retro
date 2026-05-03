@@ -27,7 +27,49 @@ import {
   type CompletionContext,
   type CompletionResult,
 } from "@codemirror/autocomplete";
+import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
 import { tags as t } from "@lezer/highlight";
+import { parse, ParseError } from "../game/interpreter";
+
+/**
+ * Lint the buffer with the same parse() the runtime uses, so the kid sees
+ * red squiggles + a gutter dot the moment they type a typo, instead of
+ * having to click RUN to find out. We deliberately surface ONE error at a
+ * time: the parser is recursive-descent and bails on the first bad token.
+ */
+function dslLinter(view: EditorView): Diagnostic[] {
+  const doc = view.state.doc;
+  const code = doc.toString();
+  if (code.trim() === "") return [];
+  try {
+    parse(code);
+    return [];
+  } catch (e) {
+    if (!(e instanceof ParseError)) return [];
+    const lineNo = Math.min(Math.max(1, e.line), doc.lines);
+    const line = doc.line(lineNo);
+    // Highlight from the reported column to the next whitespace (or end of
+    // line) so the user can see exactly which token tripped the parser.
+    const colIdx = Math.min(Math.max(0, e.col - 1), line.length);
+    const fromAbs = line.from + colIdx;
+    const text = line.text;
+    let endCol = colIdx;
+    while (endCol < text.length && /[A-Za-z0-9_"'(){};]/.test(text[endCol])) {
+      endCol++;
+    }
+    if (endCol === colIdx) endCol = Math.min(text.length, colIdx + 1);
+    const toAbs = Math.max(fromAbs + 1, line.from + endCol);
+    return [
+      {
+        from: fromAbs,
+        to: toAbs,
+        severity: "error",
+        message: e.message.replace(/^Line \d+:\s*/, ""),
+        source: "Codequest",
+      },
+    ];
+  }
+}
 
 const setExecLine = StateEffect.define<number | null>();
 
@@ -148,6 +190,7 @@ export class CodeEditor {
       doc: initial,
       extensions: [
         lineNumbers(),
+        lintGutter(),
         history(),
         bracketMatching(),
         indentOnInput(),
@@ -160,6 +203,7 @@ export class CodeEditor {
           activateOnTyping: true,
           icons: false,
         }),
+        linter(dslLinter, { delay: 350 }),
         keymap.of([
           ...defaultKeymap,
           ...historyKeymap,
