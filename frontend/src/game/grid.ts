@@ -46,6 +46,8 @@ export interface LevelSpec {
    */
   grid: string;
   goal: GoalSpec;
+  /** Hand-tuned ideal step count. <= par = 3 stars, <= par*1.5 = 2 stars, else 1. */
+  parSteps: number;
 }
 
 export interface World {

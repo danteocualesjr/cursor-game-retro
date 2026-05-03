@@ -17,16 +17,31 @@ type Speed = (typeof SPEEDS)[number];
 interface Progress {
   solved: number[];
   current: number;
+  /** Best (highest) star count earned per level id (1-3). */
+  stars?: Record<number, number>;
+  /** Best (lowest) step count achieved per level id. */
+  bestSteps?: Record<number, number>;
 }
 
 function loadProgress(): Progress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Progress;
+    if (raw) {
+      const p = JSON.parse(raw) as Progress;
+      p.stars ??= {};
+      p.bestSteps ??= {};
+      return p;
+    }
   } catch {
     /* fall through */
   }
-  return { solved: [], current: 1 };
+  return { solved: [], current: 1, stars: {}, bestSteps: {} };
+}
+
+function starsForSteps(steps: number, par: number): number {
+  if (steps <= par) return 3;
+  if (steps <= Math.ceil(par * 1.5)) return 2;
+  return 1;
 }
 
 function saveProgress(p: Progress) {
@@ -98,10 +113,16 @@ function saveCode(id: number, code: string) {
 }
 
 function renderHud() {
-  hud.renderPills(LEVELS, currentLevelId, new Set(progress.solved), (id) => {
-    if (id === currentLevelId) return;
-    selectLevel(id);
-  });
+  hud.renderPills(
+    LEVELS,
+    currentLevelId,
+    new Set(progress.solved),
+    progress.stars ?? {},
+    (id) => {
+      if (id === currentLevelId) return;
+      selectLevel(id);
+    },
+  );
 }
 
 function selectLevel(id: number) {
@@ -197,9 +218,21 @@ function resetWorldOnly() {
 
 function onWin() {
   audio.win();
-  hud.setStatus(`Solved in ${world.steps} steps!`, "good");
+  const par = world.level.parSteps;
+  const stars = starsForSteps(world.steps, par);
+  const starGlyphs = "*".repeat(stars) + ".".repeat(3 - stars);
+  hud.setStatus(`Solved in ${world.steps} steps! ${starGlyphs}`, "good");
+
+  progress.stars ??= {};
+  progress.bestSteps ??= {};
   if (!progress.solved.includes(currentLevelId)) {
     progress.solved.push(currentLevelId);
+  }
+  const prevStars = progress.stars[currentLevelId] ?? 0;
+  if (stars > prevStars) progress.stars[currentLevelId] = stars;
+  const prevBest = progress.bestSteps[currentLevelId];
+  if (prevBest === undefined || world.steps < prevBest) {
+    progress.bestSteps[currentLevelId] = world.steps;
   }
   saveProgress(progress);
   renderHud();
@@ -208,14 +241,16 @@ function onWin() {
     () => document.querySelector(".game-pane")?.classList.remove("win-flash"),
     700,
   );
+  const starWord =
+    stars === 3 ? "Three stars! Optimal!" : stars === 2 ? "Two stars - try shaving a few steps." : "One star - can you do it in fewer steps?";
   const next = LEVELS.find((l) => l.id === currentLevelId + 1);
   if (next) {
     hoot.show(
-      `You did it! Press a level pill to try the next quest, or replay this one.`,
+      `You did it! ${starWord} Pick the next pill, or replay this one.`,
       { sticky: true },
     );
   } else {
-    hoot.show(`Wow! You finished every quest. You're a real coder now.`, {
+    hoot.show(`Wow! You finished every quest. ${starWord} You're a real coder now.`, {
       sticky: true,
     });
   }

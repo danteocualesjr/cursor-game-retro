@@ -14,6 +14,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W",
     ].join("\n"),
     goal: { kind: "reach", x: 6, y: 1 },
+    parSteps: 5,
   },
   {
     id: 2,
@@ -32,6 +33,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W",
     ].join("\n"),
     goal: { kind: "reach", x: 5, y: 4 },
+    parSteps: 8,
   },
   {
     id: 3,
@@ -52,6 +54,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W",
     ].join("\n"),
     goal: { kind: "reach", x: 6, y: 6 },
+    parSteps: 24,
   },
   {
     id: 4,
@@ -67,6 +70,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W W",
     ].join("\n"),
     goal: { kind: "collect-all" },
+    parSteps: 9,
   },
   {
     id: 5,
@@ -84,6 +88,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W",
     ].join("\n"),
     goal: { kind: "switches" },
+    parSteps: 3,
   },
   {
     id: 6,
@@ -106,6 +111,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W W W W W W",
     ].join("\n"),
     goal: { kind: "collect-all" },
+    parSteps: 16,
   },
   {
     id: 7,
@@ -129,6 +135,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W",
     ].join("\n"),
     goal: { kind: "defeat-all" },
+    parSteps: 3,
   },
   {
     id: 8,
@@ -158,6 +165,7 @@ export const LEVELS: LevelSpec[] = [
       "W W W W W W W W W W",
     ].join("\n"),
     goal: { kind: "collect-all" },
+    parSteps: 32,
   },
 ];
 

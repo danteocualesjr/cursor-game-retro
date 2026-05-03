@@ -59,18 +59,35 @@ export class Hud {
     levels: LevelSpec[],
     currentId: number,
     solved: Set<number>,
+    stars: Record<number, number>,
     onPick: (id: number) => void,
   ) {
     this.pillBox.innerHTML = "";
     for (const lvl of levels) {
+      const wrap = document.createElement("div");
+      wrap.className = "level-pill-wrap";
+
       const btn = document.createElement("button");
       btn.className = "level-pill";
       if (solved.has(lvl.id)) btn.classList.add("solved");
       if (lvl.id === currentId) btn.classList.add("current");
       btn.textContent = String(lvl.id);
-      btn.title = lvl.name;
+      btn.title = `${lvl.name} - par ${lvl.parSteps} steps`;
       btn.addEventListener("click", () => onPick(lvl.id));
-      this.pillBox.appendChild(btn);
+      wrap.appendChild(btn);
+
+      const earned = stars[lvl.id] ?? 0;
+      const starRow = document.createElement("div");
+      starRow.className = "level-pill-stars";
+      starRow.setAttribute("aria-label", `${earned} of 3 stars`);
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement("span");
+        dot.className = "star-dot" + (i < earned ? " earned" : "");
+        starRow.appendChild(dot);
+      }
+      wrap.appendChild(starRow);
+
+      this.pillBox.appendChild(wrap);
     }
   }
 }
