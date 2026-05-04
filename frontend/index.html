@@ -89,7 +89,62 @@
 
       <footer class="footer">
         Built with Cursor SDK. Code carefully, brave hero.
+        <button id="howBtn" class="footer-link" type="button">
+          How to play
+        </button>
       </footer>
+    </div>
+
+    <div
+      id="onboarding"
+      class="onboarding"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onboardingTitle"
+      aria-describedby="onboardingBody"
+      hidden
+    >
+      <div class="onboarding-backdrop" data-dismiss="true"></div>
+      <div class="onboarding-card">
+        <h2 id="onboardingTitle" class="onboarding-title">
+          Welcome to Codequest!
+        </h2>
+        <div id="onboardingBody" class="onboarding-body">
+          <p>
+            You write tiny lines of code to guide the hero through pixel
+            puzzles. Try things, mess up, try again.
+          </p>
+          <ol class="onboarding-steps">
+            <li>
+              <strong>Type code</strong> in the editor. Start typing
+              <code>mo</code> to see suggestions.
+            </li>
+            <li>
+              Click <strong>RUN</strong> (or press
+              <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Enter</kbd>) to watch
+              the hero follow your code.
+            </li>
+            <li>
+              Stuck? Click <strong>HINT</strong> and Hoot the Owl - a real
+              AI tutor - will nudge you with a small clue (never the full
+              answer).
+            </li>
+            <li>
+              <strong>STOP</strong> a long run with the red button or
+              <kbd>Esc</kbd>. <strong>RESET</strong> rebuilds the level.
+            </li>
+            <li>
+              Solve a level in few enough steps to earn 3 stars. Replay
+              to chase a better score.
+            </li>
+          </ol>
+        </div>
+        <div class="onboarding-actions">
+          <button id="onboardingClose" class="btn btn-primary" type="button">
+            LET'S CODE
+          </button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

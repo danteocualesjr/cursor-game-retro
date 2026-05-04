@@ -6,6 +6,7 @@ import { audio } from "./game/audio";
 import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
+import { Onboarding } from "./ui/onboarding";
 import { explainError, getHealth, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
@@ -59,6 +60,7 @@ const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement;
 const hintBtn = document.getElementById("hintBtn") as HTMLButtonElement;
 const speedBtn = document.getElementById("speedBtn") as HTMLButtonElement;
 const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
+const howBtn = document.getElementById("howBtn") as HTMLButtonElement;
 
 const hud = new Hud();
 const hoot = new HootTutor();
@@ -92,6 +94,10 @@ speedBtn.addEventListener("click", () => cycleSpeed());
 muteBtn.addEventListener("click", () => toggleMute());
 
 window.addEventListener("keydown", (e) => {
+  // Don't fire game shortcuts while a modal is open - Esc and Enter
+  // belong to the dialog in that case.
+  const onboardingEl = document.getElementById("onboarding");
+  if (onboardingEl && !onboardingEl.hidden) return;
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
     if (runAbort) stopProgram();
@@ -382,6 +388,10 @@ function cycleSpeed() {
 
 // Pre-flight: hide Hoot until first interaction.
 hoot.hide();
+
+const onboarding = new Onboarding();
+howBtn.addEventListener("click", () => onboarding.open(howBtn));
+onboarding.showIfFirstTime();
 
 void refreshTutorHealth();
 
