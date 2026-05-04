@@ -6,7 +6,7 @@ import { audio } from "./game/audio";
 import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
-import { explainError, requestHint } from "./api";
+import { explainError, getHealth, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
 const CODE_KEY = (id: number) => `codequest:code:${id}`;
@@ -382,3 +382,54 @@ function cycleSpeed() {
 
 // Pre-flight: hide Hoot until first interaction.
 hoot.hide();
+
+void refreshTutorHealth();
+
+async function refreshTutorHealth() {
+  const badge = document.getElementById("tutorBadge");
+  if (!badge) return;
+  const dot = badge.querySelector(".tutor-badge-dot");
+  const text = badge.querySelector(".tutor-badge-text");
+  const setState = (
+    state: "online" | "fallback" | "offline",
+    label: string,
+    title: string,
+  ) => {
+    badge.classList.remove(
+      "tutor-badge-unknown",
+      "tutor-badge-online",
+      "tutor-badge-fallback",
+      "tutor-badge-offline",
+    );
+    badge.classList.add(`tutor-badge-${state}`);
+    if (text) text.textContent = label;
+    badge.title = title;
+    if (dot) dot.setAttribute("aria-hidden", "true");
+  };
+
+  const health = await getHealth();
+  if (!health) {
+    setState(
+      "offline",
+      "tutor offline",
+      "Backend isn't reachable. Hoot's hint button will fail until it comes back.",
+    );
+    hintBtn.title = "Backend offline - HINT will fail until it returns";
+    return;
+  }
+  if (health.cursorSdk) {
+    setState(
+      "online",
+      "tutor live",
+      `AI tutor is live (model: ${health.model}). HINT calls a real Cursor agent.`,
+    );
+    hintBtn.title = `Ask the AI tutor (live, model: ${health.model})`;
+  } else {
+    setState(
+      "fallback",
+      "fallback hints",
+      "No CURSOR_API_KEY configured on the backend - HINT serves canned, per-level fallback hints.",
+    );
+    hintBtn.title = "Ask Hoot (using canned fallback hints - no Cursor API key)";
+  }
+}

@@ -49,6 +49,25 @@ export async function requestHint(req: HintRequest): Promise<HintResponse> {
   return (await res.json()) as HintResponse;
 }
 
+export interface HealthResponse {
+  ok: boolean;
+  /** True when the backend has a non-placeholder CURSOR_API_KEY. */
+  cursorSdk: boolean;
+  model: string;
+}
+
+/** One-shot health probe; returns null on network failure so callers can
+ *  render a sensible "offline" state without throwing. */
+export async function getHealth(): Promise<HealthResponse | null> {
+  try {
+    const res = await fetch("/api/health", { method: "GET" });
+    if (!res.ok) return null;
+    return (await res.json()) as HealthResponse;
+  } catch {
+    return null;
+  }
+}
+
 export async function explainError(req: {
   levelId: number;
   code: string;

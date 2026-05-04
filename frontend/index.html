@@ -15,7 +15,18 @@
   <body>
     <div id="app">
       <header class="topbar">
-        <div class="title">CODEQUEST</div>
+        <div class="title-block">
+          <div class="title">CODEQUEST</div>
+          <div
+            id="tutorBadge"
+            class="tutor-badge tutor-badge-unknown"
+            title="Checking AI tutor status..."
+            aria-live="polite"
+          >
+            <span class="tutor-badge-dot" aria-hidden="true"></span>
+            <span class="tutor-badge-text">checking</span>
+          </div>
+        </div>
         <div class="subtitle">Hoot the Owl needs your code!</div>
         <div class="level-pills" id="levelPills"></div>
       </header>
