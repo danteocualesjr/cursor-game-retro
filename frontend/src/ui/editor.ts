@@ -126,16 +126,20 @@ function dslCompletions(ctx: CompletionContext): CompletionResult | null {
   return { from: word.from, options, validFor: /^[A-Za-z_]\w*$/ };
 }
 
+/* Editor highlight tuned for the 80s neon background:
+   keywords = hot magenta, functions = neon yellow, sensors and
+   strings = electric cyan, numbers = NES green, comments = dim
+   cyan-grey. Reads clearly on #100620 editor background. */
 const retroHighlight = HighlightStyle.define([
-  { tag: t.keyword, color: "#ff66aa", fontWeight: "bold" },
-  { tag: t.controlKeyword, color: "#ff66aa", fontWeight: "bold" },
-  { tag: t.function(t.variableName), color: "#ffd633" },
-  { tag: t.number, color: "#66ff99" },
-  { tag: t.string, color: "#66ccff" },
-  { tag: t.comment, color: "#7a7aaf", fontStyle: "italic" },
-  { tag: t.operator, color: "#cc99ff" },
-  { tag: t.bracket, color: "#cc99ff" },
-  { tag: t.variableName, color: "#f4f4ff" },
+  { tag: t.keyword, color: "#ff2e88", fontWeight: "bold" },
+  { tag: t.controlKeyword, color: "#ff2e88", fontWeight: "bold" },
+  { tag: t.function(t.variableName), color: "#ffea00" },
+  { tag: t.number, color: "#39ff14" },
+  { tag: t.string, color: "#00f0ff" },
+  { tag: t.comment, color: "#5a7a8a", fontStyle: "italic" },
+  { tag: t.operator, color: "#ff66d9" },
+  { tag: t.bracket, color: "#ff66d9" },
+  { tag: t.variableName, color: "#f0f4ff" },
 ]);
 
 export class CodeEditor {

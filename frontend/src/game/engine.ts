@@ -15,25 +15,28 @@ interface Anim {
   resolve: () => void;
 }
 
+/* 80s arcade-cabinet palette: deep magenta-black floor, magenta walls,
+   hot accents. Sprite colors picked to read clearly against the dark
+   panel background and the CRT scanline overlay. */
 const PALETTE = {
-  bg: "#10102a",
-  floorA: "#21214a",
-  floorB: "#1b1b3e",
-  wallTop: "#5050a0",
-  wallSide: "#33336e",
-  wallShadow: "#181830",
-  goal: "#ffd633",
-  goalGlow: "#ffe680",
-  switchOff: "#553355",
-  switchOn: "#66ff99",
-  hero: "#ffe0b3",
-  heroTunic: "#33aaff",
-  heroHair: "#552200",
-  heroSword: "#dddddd",
-  crate: "#a86b3c",
-  crateDark: "#6b3f1f",
-  slime: "#66ff99",
-  slimeDark: "#338855",
+  bg: "#0a0414",
+  floorA: "#1a0a30",
+  floorB: "#22113a",
+  wallTop: "#7a1a4d",
+  wallSide: "#400a28",
+  wallShadow: "#180008",
+  goal: "#ffea00",
+  goalGlow: "#ffff99",
+  switchOff: "#3a0a2a",
+  switchOn: "#39ff14",
+  hero: "#ffd9a8",
+  heroTunic: "#00f0ff", // electric cyan tunic - default hero color
+  heroHair: "#3a1500",
+  heroSword: "#f0f4ff",
+  crate: "#cc7833",
+  crateDark: "#5a2f0f",
+  slime: "#39ff14",
+  slimeDark: "#0d6614",
   fadeOverlay: "rgba(0,0,0,0.0)",
 };
 

@@ -80,8 +80,7 @@ hud.setCmdInsertHandler((name) => editor.insertSnippet(name));
 renderHud();
 hud.setLevel(world.level);
 hud.setGoalProgress(world);
-muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
-muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
+reflectMuteButton();
 
 runBtn.addEventListener("click", () => {
   if (runAbort) {
@@ -353,8 +352,40 @@ async function askHootForError() {
 
 function toggleMute() {
   audio.setMuted(!audio.muted);
-  muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
-  muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
+  reflectMuteButton();
+}
+
+function reflectMuteButton() {
+  const muted = audio.muted;
+  muteBtn.setAttribute("aria-pressed", muted ? "true" : "false");
+  muteBtn.setAttribute("aria-label", muted ? "Sound off" : "Sound on");
+  muteBtn.title = muted ? "Sound off (click to enable)" : "Sound on (click to mute)";
+  const wave1 = document.getElementById("muteWave1");
+  const wave2 = document.getElementById("muteWave2");
+  if (wave1) wave1.style.display = muted ? "none" : "";
+  if (wave2) wave2.style.display = muted ? "none" : "";
+  // When muted, show a slash through the speaker.
+  const icon = document.getElementById("muteIcon");
+  if (icon) {
+    let slash = icon.querySelector<SVGLineElement>("line.mute-slash");
+    if (muted) {
+      if (!slash) {
+        slash = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        slash.setAttribute("class", "mute-slash");
+        slash.setAttribute("x1", "3");
+        slash.setAttribute("y1", "3");
+        slash.setAttribute("x2", "21");
+        slash.setAttribute("y2", "21");
+        slash.setAttribute("stroke", "currentColor");
+        slash.setAttribute("stroke-width", "2.5");
+        icon.appendChild(slash);
+      }
+    } else if (slash) {
+      slash.remove();
+    }
+  }
+  const label = document.getElementById("muteLabel");
+  if (label) label.textContent = muted ? "Sound off" : "Sound on";
 }
 
 function loadSpeed(): Speed {
@@ -379,9 +410,36 @@ function loadSpeed(): Speed {
 function applySpeed(s: Speed) {
   speed = s;
   engine.setSpeed(s);
-  speedBtn.textContent = `${s}x`;
   speedBtn.classList.toggle("fast", s === 2);
   speedBtn.classList.toggle("faster", s === 4);
+  speedBtn.setAttribute("aria-label", `Animation speed: ${s}x`);
+  speedBtn.title = `Speed ${s}x (click to cycle)`;
+  const label = document.getElementById("speedLabel");
+  if (label) label.textContent = `${s}x`;
+  // Render 1, 2, or 4 stacked play triangles inside the SVG icon.
+  const icon = document.getElementById("speedIcon") as SVGElement | null;
+  if (icon) {
+    icon.innerHTML = "";
+    const ns = "http://www.w3.org/2000/svg";
+    const polyOf = (pts: string) => {
+      const p = document.createElementNS(ns, "polygon");
+      p.setAttribute("points", pts);
+      p.setAttribute("fill", "currentColor");
+      return p;
+    };
+    if (s === 1) {
+      icon.appendChild(polyOf("6,4 6,20 18,12"));
+    } else if (s === 2) {
+      icon.appendChild(polyOf("3,4 3,20 12,12"));
+      icon.appendChild(polyOf("12,4 12,20 21,12"));
+    } else {
+      // 4 stacked half-height triangles forming a chevron grid
+      icon.appendChild(polyOf("2,3 2,11 10,7"));
+      icon.appendChild(polyOf("12,3 12,11 20,7"));
+      icon.appendChild(polyOf("2,13 2,21 10,17"));
+      icon.appendChild(polyOf("12,13 12,21 20,17"));
+    }
+  }
   try {
     localStorage.setItem(SPEED_KEY, String(s));
   } catch {

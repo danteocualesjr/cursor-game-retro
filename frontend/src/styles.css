@@ -1,21 +1,40 @@
+/* ===========================================================
+   CODEQUEST: 80s arcade-cabinet neon theme.
+   Deep magenta-black background, hot magenta + electric cyan +
+   neon yellow accents, off-white text. CRT scanlines + vignette
+   on body, chunky pixel bevels on every panel, multi-layer
+   chromatic-shadow marquee title, press-down chunky buttons.
+   No soft pastel blurs anywhere.
+   =========================================================== */
+
 :root {
-  /* NES-ish palette */
-  --c-bg: #0a0a1a;
-  --c-bg-deep: #050510;
-  --c-panel: #1a1a3a;
-  --c-panel-light: #2a2a55;
-  --c-border: #6c6cd1;
-  --c-text: #f4f4ff;
-  --c-text-dim: #a4a4d4;
-  --c-accent: #ffd633;
-  --c-accent-2: #ff66aa;
-  --c-good: #66ff99;
-  --c-bad: #ff5577;
-  --c-hoot: #cc99ff;
+  /* Background tones */
+  --c-bg: #0a0414;            /* deep magenta-black */
+  --c-bg-deep: #040008;        /* near-pure-black with magenta tint */
+  --c-panel: #170a26;          /* panel base */
+  --c-panel-light: #241338;    /* hover/lighter panel */
+
+  /* Edges + chrome */
+  --c-border: #ff2e88;         /* hot neon magenta */
+  --c-bevel-light: #ff66d9;    /* light magenta highlight edge */
+  --c-bevel-shadow: #5c0a35;   /* dark magenta shadow edge */
+
+  /* Text */
+  --c-text: #f0f4ff;           /* off-white with cyan tint */
+  --c-text-dim: #7eb8c4;       /* dim cyan */
+
+  /* Accents */
+  --c-accent: #ffea00;         /* neon yellow (CTAs, current pill) */
+  --c-accent-2: #00f0ff;       /* electric cyan (sensors, secondary) */
+  --c-good: #39ff14;           /* NES neon green */
+  --c-bad: #ff2e3a;            /* hot red */
+  --c-hoot: #ff66d9;           /* Hoot's body */
 
   --font-pixel: "Press Start 2P", monospace;
   --font-mono: "VT323", monospace;
 }
+
+/* ---------- RESET ---------- */
 
 * {
   box-sizing: border-box;
@@ -26,7 +45,7 @@
 html,
 body {
   height: 100%;
-  background: var(--c-bg-deep);
+  background: var(--c-bg);
   color: var(--c-text);
   font-family: var(--font-mono);
   font-size: 18px;
@@ -36,14 +55,57 @@ body {
   font-smooth: never;
 }
 
-/* Visible keyboard-focus ring for sighted keyboard users. Mouse clicks
-   suppress the ring via :focus-visible. */
+body {
+  /* Solid arcade-cabinet floor — no soft pastel gradients. */
+  background: var(--c-bg);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------- CRT VIGNETTE + SCANLINES ----------
+   Vignette: sharp dark gradient at the edges to feel like a
+   CRT mask. NOT a pastel blur - black at 70%-100% radius only.
+   Scanlines: 1px transparent + 1px dark, repeating-linear-gradient
+   at low opacity. Applied at z-index above all content but with
+   pointer-events:none so nothing intercepts clicks. */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 998;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.55) 95%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    transparent 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* ---------- A11Y ---------- */
+
 :focus-visible {
   outline: 3px solid var(--c-accent);
   outline-offset: 2px;
 }
 
-/* Screen-reader-only helper. */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -66,12 +128,7 @@ body {
   }
 }
 
-body {
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(108, 108, 209, 0.18) 0, transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(255, 102, 170, 0.15) 0, transparent 45%);
-  background-attachment: fixed;
-}
+/* ---------- LAYOUT ---------- */
 
 #app {
   min-height: 100vh;
@@ -81,9 +138,34 @@ body {
   padding: 16px;
   max-width: 1280px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
-/* ---------- TOP BAR ---------- */
+/* ---------- PANEL BEVEL UTILITY ----------
+   Chunky 4-color pixel bevel: top/left highlight + bottom/right
+   shadow, plus an outer hard offset shadow. Applied to topbar,
+   game-pane, code-pane, hud, editor, code-header, onboarding
+   card. Combined with a 3px solid magenta border for that
+   neon-marquee outline. */
+
+.topbar,
+.game-pane,
+.code-pane,
+.hud,
+.editor,
+.code-header,
+.onboarding-card {
+  border: 3px solid var(--c-border);
+  box-shadow:
+    inset 0 2px 0 var(--c-bevel-light),
+    inset 2px 0 0 var(--c-bevel-light),
+    inset 0 -2px 0 var(--c-bevel-shadow),
+    inset -2px 0 0 var(--c-bevel-shadow),
+    0 4px 0 var(--c-bg-deep);
+}
+
+/* ---------- TOPBAR ---------- */
 
 .topbar {
   display: grid;
@@ -92,31 +174,67 @@ body {
   gap: 16px;
   padding: 12px 16px;
   background: var(--c-panel);
-  border: 4px solid var(--c-border);
-  box-shadow: 0 0 0 2px var(--c-bg-deep), 0 4px 0 var(--c-bg-deep);
 }
 
 .title-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: flex-start;
 }
 
+/* Arcade-marquee title.
+   Multi-layer chromatic-shadow stack + thin underline + subtle
+   phosphor flicker. Disabled under prefers-reduced-motion via
+   the global block above. */
 .title {
   font-family: var(--font-pixel);
-  font-size: 22px;
+  font-size: 24px;
   color: var(--c-accent);
-  letter-spacing: 2px;
-  text-shadow: 3px 3px 0 var(--c-bg-deep);
+  letter-spacing: 3px;
+  text-shadow:
+    -1px -1px 0 var(--c-accent-2),
+    1px 1px 0 var(--c-border),
+    2px 2px 0 #b3001f,
+    3px 3px 0 #6b0014,
+    4px 4px 0 #260008,
+    5px 5px 0 var(--c-bg-deep);
+  position: relative;
+  padding-bottom: 4px;
+  animation: title-flicker 5.4s ease-in-out infinite;
 }
+
+.title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--c-accent);
+  box-shadow: 0 1px 0 var(--c-border);
+}
+
+@keyframes title-flicker {
+  0%, 92%, 100% { opacity: 1; }
+  93% { opacity: 0.94; }
+  94% { opacity: 1; }
+  96% { opacity: 0.97; }
+}
+
+.subtitle {
+  color: var(--c-text-dim);
+  font-size: 18px;
+}
+
+/* ---------- TUTOR HEALTH BADGE ---------- */
 
 .tutor-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 3px 8px;
-  border: 2px solid var(--c-border);
+  border: 2px solid var(--c-text-dim);
   background: var(--c-bg-deep);
   font-family: var(--font-pixel);
   font-size: 8px;
@@ -128,8 +246,8 @@ body {
 .tutor-badge-dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
   background: var(--c-text-dim);
+  /* squared "pixel" dot, not round */
 }
 
 .tutor-badge-online {
@@ -138,7 +256,9 @@ body {
 }
 .tutor-badge-online .tutor-badge-dot {
   background: var(--c-good);
-  box-shadow: 0 0 6px var(--c-good);
+  box-shadow:
+    0 0 0 1px var(--c-good),
+    0 0 0 3px rgba(57, 255, 20, 0.35);
   animation: tutor-badge-pulse 1.6s ease-in-out infinite;
 }
 
@@ -163,10 +283,7 @@ body {
   50% { opacity: 0.4; }
 }
 
-.subtitle {
-  color: var(--c-text-dim);
-  font-size: 18px;
-}
+/* ---------- LEVEL PILLS ---------- */
 
 .level-pills {
   display: flex;
@@ -192,14 +309,15 @@ body {
   width: 6px;
   height: 6px;
   background: var(--c-bg-deep);
-  border: 1px solid var(--c-border);
-  border-radius: 50%;
+  border: 1px solid var(--c-text-dim);
 }
 
 .star-dot.earned {
   background: var(--c-accent);
   border-color: var(--c-accent);
-  box-shadow: 0 0 4px var(--c-accent);
+  box-shadow:
+    0 0 0 1px var(--c-accent),
+    0 0 0 2px var(--c-bg-deep);
 }
 
 .level-pill-best {
@@ -212,7 +330,7 @@ body {
 }
 
 .level-pill-wrap:hover .level-pill-best {
-  color: var(--c-accent);
+  color: var(--c-accent-2);
 }
 
 .level-pill {
@@ -222,12 +340,13 @@ body {
   place-items: center;
   background: var(--c-panel-light);
   border: 2px solid var(--c-border);
-  color: var(--c-text-dim);
+  color: var(--c-text);
   font-family: var(--font-pixel);
   font-size: 12px;
   cursor: pointer;
   user-select: none;
   transition: transform 80ms ease;
+  box-shadow: 0 2px 0 var(--c-bg-deep);
 }
 
 .level-pill:hover {
@@ -244,7 +363,12 @@ body {
   background: var(--c-accent);
   color: var(--c-bg-deep);
   border-color: var(--c-accent);
-  box-shadow: 0 0 0 2px var(--c-bg-deep), 0 0 12px var(--c-accent);
+  /* Crisp arcade glow - layered solid rings, not a soft blur. */
+  box-shadow:
+    0 0 0 1px var(--c-bg-deep),
+    0 0 0 3px var(--c-accent),
+    0 0 0 5px var(--c-bg-deep),
+    0 2px 0 var(--c-bg-deep);
 }
 
 /* ---------- STAGE ---------- */
@@ -267,23 +391,28 @@ body {
 .game-pane {
   position: relative;
   background: var(--c-panel);
-  border: 4px solid var(--c-border);
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 0 0 2px var(--c-bg-deep), 0 4px 0 var(--c-bg-deep);
 }
 
 #game {
   background: #000;
-  border: 4px solid var(--c-bg-deep);
+  /* Recessed CRT screen: chunky black inner frame + crisp magenta
+     ring + dark hard offset shadow. No soft glow. */
+  border: 6px solid var(--c-bg-deep);
+  outline: 2px solid var(--c-border);
+  outline-offset: 0;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   display: block;
   margin: 0 auto;
   max-width: 100%;
   height: auto;
+  box-shadow:
+    inset 0 0 0 4px var(--c-bg-deep),
+    0 4px 0 var(--c-bg-deep);
 }
 
 .hud {
@@ -292,7 +421,6 @@ body {
   gap: 12px;
   align-items: center;
   background: var(--c-bg-deep);
-  border: 2px solid var(--c-border);
   padding: 10px 12px;
   min-height: 56px;
 }
@@ -322,6 +450,7 @@ body {
   font-family: var(--font-pixel);
   font-size: 10px;
   color: var(--c-text-dim);
+  position: relative;
 }
 
 .goal-meter[hidden] {
@@ -340,7 +469,7 @@ body {
 
 .goal-meter.complete {
   border-color: var(--c-accent);
-  animation: goal-meter-flash 360ms ease;
+  animation: goal-shockwave 700ms ease-out;
 }
 
 .goal-meter.complete .goal-meter-label,
@@ -348,10 +477,23 @@ body {
   color: var(--c-accent);
 }
 
-@keyframes goal-meter-flash {
-  0% { box-shadow: 0 0 0 0 rgba(255, 214, 51, 0); }
-  50% { box-shadow: 0 0 12px 2px rgba(255, 214, 51, 0.6); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 214, 51, 0); }
+/* Pixel-shockwave: one-shot expanding crisp ring. */
+@keyframes goal-shockwave {
+  0% {
+    box-shadow:
+      0 0 0 0 var(--c-accent),
+      0 0 0 0 rgba(255, 234, 0, 0.6);
+  }
+  60% {
+    box-shadow:
+      0 0 0 2px transparent,
+      0 0 0 12px rgba(255, 234, 0, 0.1);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px transparent,
+      0 0 0 24px transparent;
+  }
 }
 
 .steps {
@@ -411,12 +553,8 @@ body {
   word-break: break-word;
 }
 
-.status.good {
-  color: var(--c-good);
-}
-.status.bad {
-  color: var(--c-bad);
-}
+.status.good { color: var(--c-good); }
+.status.bad { color: var(--c-bad); }
 
 /* ---------- HOOT ---------- */
 
@@ -432,19 +570,11 @@ body {
   animation: hoot-in 240ms ease-out;
 }
 
-.hoot[hidden] {
-  display: none;
-}
+.hoot[hidden] { display: none; }
 
 @keyframes hoot-in {
-  from {
-    transform: translateY(8px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .hoot-bubble {
@@ -458,6 +588,7 @@ body {
   line-height: 1.3;
   position: relative;
   pointer-events: auto;
+  box-shadow: 4px 4px 0 var(--c-border);
 }
 
 .hoot-bubble::after {
@@ -486,6 +617,7 @@ body {
   position: relative;
   flex-shrink: 0;
   animation: hoot-bob 1.6s ease-in-out infinite;
+  box-shadow: 0 0 0 2px var(--c-border);
 }
 
 @keyframes hoot-bob {
@@ -529,18 +661,15 @@ body {
 
 .code-pane {
   background: var(--c-panel);
-  border: 4px solid var(--c-border);
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-height: 0;
-  box-shadow: 0 0 0 2px var(--c-bg-deep), 0 4px 0 var(--c-bg-deep);
 }
 
 .code-header {
   background: var(--c-bg-deep);
-  border: 2px solid var(--c-border);
   padding: 8px 12px;
   font-size: 14px;
   color: var(--c-text-dim);
@@ -574,34 +703,29 @@ body {
   letter-spacing: 0.5px;
   user-select: none;
   transition: transform 60ms ease, background 100ms ease;
+  box-shadow: 0 2px 0 var(--c-bg-deep);
 }
 
 .cmd-chip:hover {
-  background: var(--c-border);
+  background: var(--c-bevel-shadow);
   transform: translateY(-1px);
 }
 
 .cmd-chip:active {
-  transform: translateY(0);
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--c-bg-deep);
 }
 
-.cmd-chip-keyword {
-  color: var(--c-accent-2);
-}
+.cmd-chip-keyword { color: var(--c-hoot); }
+.cmd-chip-sensor { color: var(--c-good); }
+.cmd-chip-function { color: var(--c-accent); }
 
-.cmd-chip-sensor {
-  color: var(--c-good);
-}
-
-.cmd-chip-function {
-  color: var(--c-accent);
-}
+/* ---------- EDITOR ---------- */
 
 .editor {
   flex: 1;
   min-height: 280px;
-  border: 4px solid var(--c-bg-deep);
-  background: #1c1c2e;
+  background: #100620;
   overflow: hidden;
 }
 
@@ -611,13 +735,9 @@ body {
   font-size: 20px;
 }
 
-.editor .cm-scroller {
-  font-family: "VT323", monospace;
-}
+.editor .cm-scroller { font-family: "VT323", monospace; }
 
-.editor .cm-content {
-  caret-color: var(--c-accent);
-}
+.editor .cm-content { caret-color: var(--c-accent); }
 
 .editor .cm-cursor {
   border-left-color: var(--c-accent);
@@ -631,15 +751,15 @@ body {
 }
 
 .editor .cm-activeLine {
-  background: rgba(108, 108, 209, 0.12);
+  background: rgba(255, 46, 136, 0.10);
 }
 
 .editor .cm-activeLineGutter {
-  background: rgba(255, 214, 51, 0.12);
+  background: rgba(255, 234, 0, 0.14);
 }
 
 .editor .cm-execLine {
-  background: rgba(255, 214, 51, 0.22);
+  background: rgba(255, 234, 0, 0.22);
   box-shadow: inset 3px 0 0 var(--c-accent);
   animation: exec-pulse 600ms ease-out;
 }
@@ -649,13 +769,9 @@ body {
   border-bottom: 2px wavy var(--c-bad);
 }
 
-.editor .cm-gutter-lint {
-  width: 1.2em;
-}
+.editor .cm-gutter-lint { width: 1.2em; }
 
-.editor .cm-gutter-lint .cm-gutterElement {
-  padding: 0 0.2em;
-}
+.editor .cm-gutter-lint .cm-gutterElement { padding: 0 0.2em; }
 
 .editor .cm-lint-marker-error {
   color: var(--c-bad);
@@ -684,9 +800,11 @@ body {
 }
 
 @keyframes exec-pulse {
-  from { background: rgba(255, 214, 51, 0.45); }
-  to { background: rgba(255, 214, 51, 0.22); }
+  from { background: rgba(255, 234, 0, 0.45); }
+  to { background: rgba(255, 234, 0, 0.22); }
 }
+
+/* ---------- BUTTONS ---------- */
 
 .controls {
   display: grid;
@@ -694,6 +812,8 @@ body {
   gap: 8px;
 }
 
+/* Press-down 3D feel: chunky bottom shadow that compresses on
+   :active so the button physically pushes into the cabinet. */
 .btn {
   font-family: var(--font-pixel);
   font-size: 12px;
@@ -703,16 +823,29 @@ body {
   border: 3px solid var(--c-border);
   cursor: pointer;
   letter-spacing: 1px;
-  transition: transform 60ms ease;
   user-select: none;
+  position: relative;
+  box-shadow:
+    inset 0 2px 0 var(--c-bevel-light),
+    inset 0 -2px 0 var(--c-bevel-shadow),
+    0 4px 0 var(--c-bg-deep);
+  transition: transform 60ms ease, box-shadow 60ms ease;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 2px 0 var(--c-bevel-light),
+    inset 0 -2px 0 var(--c-bevel-shadow),
+    0 5px 0 var(--c-bg-deep);
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 2px 0 var(--c-bevel-shadow),
+    inset 0 -2px 0 var(--c-bevel-light),
+    0 0 0 var(--c-bg-deep);
 }
 
 .btn:disabled {
@@ -725,6 +858,11 @@ body {
   background: var(--c-accent);
   color: var(--c-bg-deep);
   border-color: var(--c-accent);
+  box-shadow:
+    inset 0 2px 0 #fff599,
+    inset 0 -2px 0 #998c00,
+    0 4px 0 var(--c-bg-deep),
+    0 0 0 1px var(--c-bg-deep);
 }
 
 .btn-stop {
@@ -735,39 +873,73 @@ body {
 }
 
 @keyframes btn-stop-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 85, 119, 0.0); }
-  50% { box-shadow: 0 0 0 4px rgba(255, 85, 119, 0.35); }
+  0%, 100% {
+    box-shadow:
+      inset 0 2px 0 #ff8d96,
+      inset 0 -2px 0 #80171f,
+      0 4px 0 var(--c-bg-deep),
+      0 0 0 0 rgba(255, 46, 58, 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 0 #ff8d96,
+      inset 0 -2px 0 #80171f,
+      0 4px 0 var(--c-bg-deep),
+      0 0 0 4px rgba(255, 46, 58, 0.45);
+  }
 }
 
 .btn-hint {
   background: var(--c-hoot);
   color: var(--c-bg-deep);
   border-color: var(--c-hoot);
+  box-shadow:
+    inset 0 2px 0 #ffb3ec,
+    inset 0 -2px 0 #80246b,
+    0 4px 0 var(--c-bg-deep);
+}
+
+/* ---------- GLYPH BUTTONS (sound/speed) ---------- */
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  background: var(--c-panel-light);
+  color: var(--c-text);
+}
+
+.btn-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .btn-mute {
-  background: var(--c-bg-deep);
-  font-size: 9px;
-  padding: 12px 10px;
-}
-
-.btn-speed {
-  background: var(--c-panel-light);
-  font-size: 11px;
-  padding: 12px 10px;
-  min-width: 48px;
+  /* (kept for any legacy reference; .btn-icon now styles the mute button) */
 }
 
 .btn-speed.fast {
   background: var(--c-accent-2);
   color: var(--c-bg-deep);
   border-color: var(--c-accent-2);
+  box-shadow:
+    inset 0 2px 0 #99fbff,
+    inset 0 -2px 0 #006e75,
+    0 4px 0 var(--c-bg-deep);
 }
 
 .btn-speed.faster {
   background: var(--c-bad);
   color: var(--c-bg-deep);
   border-color: var(--c-bad);
+  box-shadow:
+    inset 0 2px 0 #ff8d96,
+    inset 0 -2px 0 #80171f,
+    0 4px 0 var(--c-bg-deep);
 }
 
 /* ---------- FOOTER ---------- */
@@ -787,17 +959,23 @@ body {
 .footer-link {
   background: none;
   border: none;
-  color: var(--c-accent);
+  color: var(--c-accent-2);
   font-family: var(--font-mono);
   font-size: 14px;
   cursor: pointer;
   text-decoration: underline;
   padding: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.footer-link:hover {
-  color: var(--c-accent-2);
+.footer-link svg {
+  width: 14px;
+  height: 14px;
 }
+
+.footer-link:hover { color: var(--c-accent); }
 
 /* ---------- ONBOARDING OVERLAY ---------- */
 
@@ -810,15 +988,13 @@ body {
   padding: 16px;
 }
 
-.onboarding[hidden] {
-  display: none;
-}
+.onboarding[hidden] { display: none; }
 
 .onboarding-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(5, 5, 16, 0.85);
-  backdrop-filter: blur(2px);
+  /* Solid dark - no backdrop-filter blur. */
+  background: rgba(4, 0, 8, 0.88);
 }
 
 .onboarding-card {
@@ -826,11 +1002,6 @@ body {
   max-width: 540px;
   width: 100%;
   background: var(--c-panel);
-  border: 4px solid var(--c-border);
-  box-shadow:
-    0 0 0 2px var(--c-bg-deep),
-    0 8px 0 var(--c-bg-deep),
-    0 0 32px rgba(108, 108, 209, 0.4);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -839,8 +1010,8 @@ body {
 }
 
 @keyframes onboarding-pop {
-  from { transform: translateY(8px) scale(0.97); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .onboarding-title {
@@ -848,7 +1019,10 @@ body {
   font-size: 16px;
   color: var(--c-accent);
   letter-spacing: 1.5px;
-  text-shadow: 2px 2px 0 var(--c-bg-deep);
+  text-shadow:
+    -1px -1px 0 var(--c-accent-2),
+    1px 1px 0 var(--c-border),
+    2px 2px 0 var(--c-bg-deep);
 }
 
 .onboarding-body {
@@ -861,9 +1035,7 @@ body {
   gap: 12px;
 }
 
-.onboarding-body p {
-  margin: 0;
-}
+.onboarding-body p { margin: 0; }
 
 .onboarding-steps {
   list-style-position: inside;
@@ -879,9 +1051,7 @@ body {
   font-size: 12px;
 }
 
-.onboarding-body strong {
-  color: var(--c-accent);
-}
+.onboarding-body strong { color: var(--c-accent); }
 
 .onboarding-body code {
   background: var(--c-bg-deep);
@@ -896,7 +1066,7 @@ body {
   background: var(--c-bg-deep);
   border: 2px solid var(--c-border);
   border-bottom-width: 3px;
-  border-radius: 3px;
+  border-radius: 0;
   padding: 1px 6px;
   font-family: var(--font-pixel);
   font-size: 9px;
@@ -910,9 +1080,7 @@ body {
   gap: 8px;
 }
 
-.onboarding-actions .btn {
-  min-width: 140px;
-}
+.onboarding-actions .btn { min-width: 140px; }
 
 /* ---------- WIN OVERLAY ---------- */
 
@@ -921,7 +1089,25 @@ body {
 }
 
 @keyframes win-flash {
-  0% { box-shadow: 0 0 0 2px var(--c-bg-deep), 0 0 0 var(--c-good); }
-  50% { box-shadow: 0 0 0 2px var(--c-bg-deep), 0 0 32px var(--c-good); }
-  100% { box-shadow: 0 0 0 2px var(--c-bg-deep), 0 4px 0 var(--c-bg-deep); }
+  0% {
+    box-shadow:
+      inset 0 2px 0 var(--c-bevel-light),
+      inset 0 -2px 0 var(--c-bevel-shadow),
+      0 4px 0 var(--c-bg-deep),
+      0 0 0 0 var(--c-good);
+  }
+  50% {
+    box-shadow:
+      inset 0 2px 0 var(--c-bevel-light),
+      inset 0 -2px 0 var(--c-bevel-shadow),
+      0 4px 0 var(--c-bg-deep),
+      0 0 0 8px rgba(57, 255, 20, 0.4);
+  }
+  100% {
+    box-shadow:
+      inset 0 2px 0 var(--c-bevel-light),
+      inset 0 -2px 0 var(--c-bevel-shadow),
+      0 4px 0 var(--c-bg-deep),
+      0 0 0 0 transparent;
+  }
 }
