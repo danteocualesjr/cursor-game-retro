@@ -7,7 +7,7 @@ import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
-import { explainError, getHealth, requestHint } from "./api";
+import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
 const CODE_KEY = (id: number) => `codequest:code:${id}`;
@@ -314,16 +314,57 @@ function trimMessage(msg: string): string {
    readers, and the CSS picks up the .hint-dots animation. */
 function setHintLoading(loading: boolean) {
   hintBtn.setAttribute("aria-busy", loading ? "true" : "false");
-  hintBtn.disabled = loading;
-  if (loading) {
-    hintBtn.classList.add("loading");
-  } else {
-    hintBtn.classList.remove("loading");
+  hintBtn.disabled = loading || hintCooldownTimer !== null;
+  hintBtn.classList.toggle("loading", loading);
+}
+
+/* Hint cooldown:
+   After every HINT request (success OR rate-limited), start a local
+   countdown that disables the button and ticks down a "WAIT Ns" label
+   so the player can see exactly when Hoot will be ready again. The
+   default cooldown matches the backend's per-session limiter (5s for
+   /api/hint, 3s for /api/explain-error). On a 429 we honor the server's
+   retryAfterMs so they line up perfectly. */
+const hintLabel = document.getElementById("hintLabel") as HTMLElement;
+const HINT_LABEL_DEFAULT = "HINT";
+const DEFAULT_HINT_COOLDOWN_MS = 5_000;
+let hintCooldownTimer: number | null = null;
+let hintCooldownDeadline = 0;
+
+function startHintCooldown(durationMs: number) {
+  if (durationMs <= 0) return;
+  hintCooldownDeadline = Date.now() + durationMs;
+  if (hintCooldownTimer !== null) clearInterval(hintCooldownTimer);
+  const tick = () => {
+    const remainMs = hintCooldownDeadline - Date.now();
+    if (remainMs <= 0) {
+      stopHintCooldown();
+      return;
+    }
+    const secs = Math.ceil(remainMs / 1000);
+    hintLabel.textContent = `WAIT ${secs}s`;
+  };
+  hintBtn.disabled = true;
+  hintBtn.classList.add("cooldown");
+  tick();
+  hintCooldownTimer = window.setInterval(tick, 200);
+}
+
+function stopHintCooldown() {
+  if (hintCooldownTimer !== null) {
+    clearInterval(hintCooldownTimer);
+    hintCooldownTimer = null;
+  }
+  hintBtn.classList.remove("cooldown");
+  hintLabel.textContent = HINT_LABEL_DEFAULT;
+  // Re-enable only if no other state is keeping it disabled.
+  if (hintBtn.getAttribute("aria-busy") !== "true") {
+    hintBtn.disabled = false;
   }
 }
 
 async function askHoot() {
-  if (hintBtn.getAttribute("aria-busy") === "true") return;
+  if (hintBtn.disabled) return;
   audio.ensure();
   setHintLoading(true);
   hoot.show("Hoot is thinking...", { thinking: true, sticky: true });
@@ -337,21 +378,27 @@ async function askHoot() {
       lastError: lastError ?? undefined,
     });
     hoot.show(res.text, { sticky: false });
-  } catch (e) {
-    hoot.show(
-      e instanceof Error
-        ? `Hoot ruffles his feathers. ${e.message}`
-        : "Hoot can't think right now.",
-      { sticky: false },
-    );
-  } finally {
     setHintLoading(false);
+    startHintCooldown(DEFAULT_HINT_COOLDOWN_MS);
+  } catch (e) {
+    setHintLoading(false);
+    if (e instanceof HintRateLimitError) {
+      hoot.show(e.message, { sticky: false });
+      startHintCooldown(e.retryAfterMs);
+    } else {
+      hoot.show(
+        e instanceof Error
+          ? `Hoot ruffles his feathers. ${e.message}`
+          : "Hoot can't think right now.",
+        { sticky: false },
+      );
+    }
   }
 }
 
 async function askHootForError() {
   if (!lastError) return;
-  if (hintBtn.getAttribute("aria-busy") === "true") return;
+  if (hintBtn.disabled) return;
   setHintLoading(true);
   hoot.show("Hoot is reading your code...", { thinking: true, sticky: true });
   try {
@@ -362,15 +409,21 @@ async function askHootForError() {
       errorMessage: trimMessage(lastError.message),
     });
     hoot.show(res.text, { sticky: false });
-  } catch (e) {
-    hoot.show(
-      e instanceof Error
-        ? `Hoot ruffles his feathers. ${e.message}`
-        : "Hoot is silent.",
-      { sticky: false },
-    );
-  } finally {
     setHintLoading(false);
+    startHintCooldown(3_000);
+  } catch (e) {
+    setHintLoading(false);
+    if (e instanceof HintRateLimitError) {
+      hoot.show(e.message, { sticky: false });
+      startHintCooldown(e.retryAfterMs);
+    } else {
+      hoot.show(
+        e instanceof Error
+          ? `Hoot ruffles his feathers. ${e.message}`
+          : "Hoot is silent.",
+        { sticky: false },
+      );
+    }
   }
 }
 

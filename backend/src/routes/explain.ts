@@ -29,6 +29,7 @@ export async function explainHandler(req: Request, res: Response) {
     res.status(429).json({
       text: `Hoot needs a breather. Try again in ${Math.ceil(wait / 1000)} seconds.`,
       source: "fallback",
+      retryAfterMs: wait,
     });
     return;
   }

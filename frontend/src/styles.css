@@ -977,6 +977,24 @@ body::after {
   cursor: wait;
 }
 
+/* Cooldown: dim the button and switch the label color to dim cyan so
+   it reads as "not ready yet". The label text is set in main.ts to
+   "WAIT Ns" and ticks down. */
+.btn-hint.cooldown {
+  background: var(--c-panel-light);
+  color: var(--c-text-dim);
+  border-color: var(--c-text-dim);
+  box-shadow:
+    inset 0 2px 0 var(--c-bevel-light),
+    inset 0 -2px 0 var(--c-bevel-shadow),
+    0 4px 0 var(--c-bg-deep);
+  cursor: not-allowed;
+}
+
+.btn-hint.cooldown .hint-label {
+  letter-spacing: 0.5px;
+}
+
 /* ---------- GLYPH BUTTONS (sound/speed) ---------- */
 
 .btn-icon {

@@ -31,22 +31,56 @@ export interface HintResponse {
   text: string;
   source: "cursor-sdk" | "fallback";
   thinkingMs?: number;
+  /** Set on a 429 response so the UI can show a cooldown countdown. */
+  retryAfterMs?: number;
 }
 
-export async function requestHint(req: HintRequest): Promise<HintResponse> {
-  const res = await fetch("/api/hint", {
+/** Error subclass thrown when the backend's per-session limiter rejects
+ *  the request. Carries `retryAfterMs` so the UI can start a precise
+ *  countdown instead of guessing. */
+export class HintRateLimitError extends Error {
+  retryAfterMs: number;
+  constructor(message: string, retryAfterMs: number) {
+    super(message);
+    this.retryAfterMs = retryAfterMs;
+  }
+}
+
+async function postHint(url: string, body: unknown): Promise<HintResponse> {
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-session-id": getSessionId(),
     },
-    body: JSON.stringify(req),
+    body: JSON.stringify(body),
   });
+  if (res.status === 429) {
+    // Try to parse the structured rate-limit payload; fall back to a
+    // best-guess 5-second retry if the server didn't send retryAfterMs
+    // (older deploys, or proxies that strip the body).
+    let msg = "Hoot needs a breather.";
+    let retryAfterMs = 5_000;
+    try {
+      const j = (await res.json()) as Partial<HintResponse>;
+      if (typeof j.text === "string" && j.text.length > 0) msg = j.text;
+      if (typeof j.retryAfterMs === "number" && j.retryAfterMs > 0) {
+        retryAfterMs = j.retryAfterMs;
+      }
+    } catch {
+      /* ignore */
+    }
+    throw new HintRateLimitError(msg, retryAfterMs);
+  }
   if (!res.ok) {
     const msg = await res.text().catch(() => "");
     throw new Error(`Hoot can't think right now (${res.status}). ${msg}`);
   }
   return (await res.json()) as HintResponse;
+}
+
+export async function requestHint(req: HintRequest): Promise<HintResponse> {
+  return postHint("/api/hint", req);
 }
 
 export interface HealthResponse {
@@ -74,17 +108,5 @@ export async function explainError(req: {
   errorLine: number;
   errorMessage: string;
 }): Promise<HintResponse> {
-  const res = await fetch("/api/explain-error", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-session-id": getSessionId(),
-    },
-    body: JSON.stringify(req),
-  });
-  if (!res.ok) {
-    const msg = await res.text().catch(() => "");
-    throw new Error(`Hoot can't think right now (${res.status}). ${msg}`);
-  }
-  return (await res.json()) as HintResponse;
+  return postHint("/api/explain-error", req);
 }
