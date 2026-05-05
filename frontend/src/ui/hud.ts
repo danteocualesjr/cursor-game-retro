@@ -127,6 +127,7 @@ export class Hud {
     currentId: number,
     solved: Set<number>,
     stars: Record<number, number>,
+    bestSteps: Record<number, number>,
     onPick: (id: number) => void,
   ) {
     this.pillBox.innerHTML = "";
@@ -139,20 +140,36 @@ export class Hud {
       if (solved.has(lvl.id)) btn.classList.add("solved");
       if (lvl.id === currentId) btn.classList.add("current");
       btn.textContent = String(lvl.id);
-      btn.title = `${lvl.name} - par ${lvl.parSteps} steps`;
+      const earnedStars = stars[lvl.id] ?? 0;
+      const best = bestSteps[lvl.id];
+      const tooltipParts = [
+        `${lvl.name} - par ${lvl.parSteps} steps`,
+        best !== undefined
+          ? `Your best: ${best} steps (${earnedStars}/3 stars)`
+          : "Not solved yet",
+      ];
+      btn.title = tooltipParts.join("\n");
       btn.addEventListener("click", () => onPick(lvl.id));
       wrap.appendChild(btn);
 
-      const earned = stars[lvl.id] ?? 0;
       const starRow = document.createElement("div");
       starRow.className = "level-pill-stars";
-      starRow.setAttribute("aria-label", `${earned} of 3 stars`);
+      starRow.setAttribute("aria-label", `${earnedStars} of 3 stars`);
       for (let i = 0; i < 3; i++) {
         const dot = document.createElement("span");
-        dot.className = "star-dot" + (i < earned ? " earned" : "");
+        dot.className = "star-dot" + (i < earnedStars ? " earned" : "");
         starRow.appendChild(dot);
       }
       wrap.appendChild(starRow);
+
+      if (best !== undefined) {
+        const bestLabel = document.createElement("span");
+        bestLabel.className = "level-pill-best";
+        bestLabel.textContent = `${best}`;
+        bestLabel.setAttribute("aria-label", `best: ${best} steps`);
+        bestLabel.title = `Best: ${best} steps (par ${lvl.parSteps})`;
+        wrap.appendChild(bestLabel);
+      }
 
       this.pillBox.appendChild(wrap);
     }

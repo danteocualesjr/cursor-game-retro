@@ -202,6 +202,19 @@ body {
   box-shadow: 0 0 4px var(--c-accent);
 }
 
+.level-pill-best {
+  font-family: var(--font-pixel);
+  font-size: 7px;
+  color: var(--c-text-dim);
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+  cursor: help;
+}
+
+.level-pill-wrap:hover .level-pill-best {
+  color: var(--c-accent);
+}
+
 .level-pill {
   width: 32px;
   height: 32px;

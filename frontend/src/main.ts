@@ -138,6 +138,7 @@ function renderHud() {
     currentLevelId,
     new Set(progress.solved),
     progress.stars ?? {},
+    progress.bestSteps ?? {},
     (id) => {
       if (id === currentLevelId) return;
       selectLevel(id);
