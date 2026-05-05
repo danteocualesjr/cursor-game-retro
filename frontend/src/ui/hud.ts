@@ -216,12 +216,15 @@ export class Hud {
     for (const lvl of levels) {
       const wrap = document.createElement("div");
       wrap.className = "level-pill-wrap";
+      const isDaily = lvl.id === 0;
+      if (isDaily) wrap.classList.add("daily");
 
       const btn = document.createElement("button");
       btn.className = "level-pill";
       if (solved.has(lvl.id)) btn.classList.add("solved");
       if (lvl.id === currentId) btn.classList.add("current");
-      btn.textContent = String(lvl.id);
+      if (isDaily) btn.classList.add("daily");
+      btn.textContent = isDaily ? "★" : String(lvl.id);
       const earnedStars = stars[lvl.id] ?? 0;
       const best = bestSteps[lvl.id];
       const bestTime = bestTimeMs[lvl.id];
@@ -246,7 +249,12 @@ export class Hud {
       }
       wrap.appendChild(starRow);
 
-      if (best !== undefined) {
+      if (isDaily) {
+        const dailyLabel = document.createElement("span");
+        dailyLabel.className = "level-pill-best level-pill-daily";
+        dailyLabel.textContent = "DAILY";
+        wrap.appendChild(dailyLabel);
+      } else if (best !== undefined) {
         const bestLabel = document.createElement("span");
         bestLabel.className = "level-pill-best";
         bestLabel.textContent = `${best}`;

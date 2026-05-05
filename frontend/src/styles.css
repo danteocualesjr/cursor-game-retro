@@ -393,6 +393,28 @@ body::after {
     0 2px 0 var(--c-bg-deep);
 }
 
+/* Daily pill: cyan border so it stands out from the magenta-bordered
+   regular levels, plus a tighter "DAILY" label below in cyan. */
+.level-pill.daily {
+  border-color: var(--c-accent-2);
+  color: var(--c-accent-2);
+}
+
+.level-pill.daily.current {
+  background: var(--c-accent-2);
+  color: var(--c-bg-deep);
+  box-shadow:
+    0 0 0 1px var(--c-bg-deep),
+    0 0 0 3px var(--c-accent-2),
+    0 0 0 5px var(--c-bg-deep),
+    0 2px 0 var(--c-bg-deep);
+}
+
+.level-pill-daily {
+  color: var(--c-accent-2) !important;
+  font-weight: bold;
+}
+
 /* ---------- STAGE ---------- */
 
 .stage {

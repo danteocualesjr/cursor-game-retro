@@ -2,6 +2,7 @@ import { Engine } from "./game/engine";
 import { buildWorld } from "./game/grid";
 import { execute, parse, ParseError } from "./game/interpreter";
 import { LEVELS, levelById } from "./game/levels";
+import { DAILY_LEVEL_ID, generateDailyLevel } from "./game/daily";
 import { audio } from "./game/audio";
 import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
@@ -75,8 +76,24 @@ const hud = new Hud();
 const hoot = new HootTutor();
 const progress = loadProgress();
 
+// Today's daily challenge is computed once at boot from the local
+// calendar date. It lives at id=0 in front of the main level array so
+// it always shows up as the first level pill.
+const dailyLevel = generateDailyLevel();
+const allLevels = [dailyLevel, ...LEVELS];
+
+function levelByIdLocal(id: number) {
+  if (id === DAILY_LEVEL_ID) return dailyLevel;
+  return levelById(id);
+}
+
 let currentLevelId = progress.current;
-let world = buildWorld(levelById(currentLevelId));
+// If the saved progress points at a level id we no longer recognize,
+// reset to the daily.
+if (!allLevels.find((l) => l.id === currentLevelId)) {
+  currentLevelId = DAILY_LEVEL_ID;
+}
+let world = buildWorld(levelByIdLocal(currentLevelId));
 const engine = new Engine(canvas, world);
 // Apply the persisted hero color before any frame is drawn.
 engine.setHeroTunic(loadHero().tunic);
@@ -137,7 +154,7 @@ function loadCode(id: number): string {
   } catch {
     /* ignore */
   }
-  return levelById(id).starterCode;
+  return levelByIdLocal(id).starterCode;
 }
 
 function saveCode(id: number, code: string) {
@@ -150,7 +167,7 @@ function saveCode(id: number, code: string) {
 
 function renderHud() {
   hud.renderPills(
-    LEVELS,
+    allLevels,
     currentLevelId,
     new Set(progress.solved),
     progress.stars ?? {},
@@ -169,7 +186,7 @@ function selectLevel(id: number) {
   currentLevelId = id;
   progress.current = id;
   saveProgress(progress);
-  world = buildWorld(levelById(id));
+  world = buildWorld(levelByIdLocal(id));
   engine.setWorld(world);
   editor.setCode(loadCode(id));
   editor.setExecutingLine(null);
@@ -183,7 +200,7 @@ function selectLevel(id: number) {
 
 function resetLevel() {
   if (runAbort) runAbort.abort();
-  world = buildWorld(levelById(currentLevelId));
+  world = buildWorld(levelByIdLocal(currentLevelId));
   engine.setWorld(world);
   editor.setExecutingLine(null);
   hud.setStatus("Level reset.", "");
@@ -258,7 +275,7 @@ async function runProgram() {
 }
 
 function resetWorldOnly() {
-  world = buildWorld(levelById(currentLevelId));
+  world = buildWorld(levelByIdLocal(currentLevelId));
   engine.setWorld(world);
 }
 
