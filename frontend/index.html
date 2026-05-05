@@ -43,9 +43,20 @@
           <div class="hud">
             <div class="objective" id="objective" aria-live="polite">Loading...</div>
             <div class="hud-side">
-              <div class="steps" id="steps" title="Hero actions used so far" aria-label="Steps taken">
-                <span class="steps-label" aria-hidden="true">STEPS</span>
-                <span class="steps-value" id="stepsValue">0</span>
+              <div class="hud-pills">
+                <div
+                  class="goal-meter"
+                  id="goalMeter"
+                  hidden
+                  aria-label="Goal progress"
+                >
+                  <span class="goal-meter-label" aria-hidden="true">GOAL</span>
+                  <span class="goal-meter-value" id="goalMeterValue">0/0</span>
+                </div>
+                <div class="steps" id="steps" title="Hero actions used so far" aria-label="Steps taken">
+                  <span class="steps-label" aria-hidden="true">STEPS</span>
+                  <span class="steps-value" id="stepsValue">0</span>
+                </div>
               </div>
               <div
                 class="status"

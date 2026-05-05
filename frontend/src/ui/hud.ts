@@ -1,4 +1,4 @@
-import type { LevelSpec } from "../game/grid";
+import type { LevelSpec, World } from "../game/grid";
 
 export class Hud {
   private objective: HTMLElement;
@@ -7,8 +7,11 @@ export class Hud {
   private pillBox: HTMLElement;
   private stepsBox: HTMLElement;
   private stepsValue: HTMLElement;
+  private goalMeter: HTMLElement;
+  private goalMeterValue: HTMLElement;
   private bumpTimer: number | null = null;
   private lastSteps = 0;
+  private lastGoalRatio = -1;
 
   constructor() {
     this.objective = mustEl("#objective");
@@ -17,6 +20,8 @@ export class Hud {
     this.pillBox = mustEl("#levelPills");
     this.stepsBox = mustEl("#steps");
     this.stepsValue = mustEl("#stepsValue");
+    this.goalMeter = mustEl("#goalMeter");
+    this.goalMeterValue = mustEl("#goalMeterValue");
   }
 
   setLevel(level: LevelSpec) {
@@ -26,6 +31,68 @@ export class Hud {
     this.cmds.textContent = level.allowedCommands.join(", ");
     this.setStatus("");
     this.setSteps(0);
+    this.lastGoalRatio = -1;
+  }
+
+  /** Recompute and render the live goal-progress meter. */
+  setGoalProgress(world: World) {
+    const goal = world.level.goal;
+    let label: string | null = null;
+    let ratio = 0;
+    switch (goal.kind) {
+      case "collect-all": {
+        const left = world.gems.length;
+        const total = world.totalGems;
+        const done = total - left;
+        if (total > 0) {
+          label = `${done}/${total} gems`;
+          ratio = done / total;
+        }
+        break;
+      }
+      case "switches": {
+        const total = world.switches.length;
+        const done = world.switches.filter((s) => s.active).length;
+        if (total > 0) {
+          label = `${done}/${total} switches`;
+          ratio = done / total;
+        }
+        break;
+      }
+      case "defeat-all": {
+        const total = world.totalSlimes;
+        const left = world.slimes.length;
+        const done = total - left;
+        if (total > 0) {
+          label = `${done}/${total} slimes`;
+          ratio = done / total;
+        }
+        break;
+      }
+      case "reach":
+        // No live count - the goal tile itself is the indicator.
+        break;
+    }
+    if (label === null) {
+      this.goalMeter.hidden = true;
+      this.lastGoalRatio = -1;
+      return;
+    }
+    this.goalMeter.hidden = false;
+    this.goalMeterValue.textContent = label;
+    const wasIncomplete = this.lastGoalRatio < 1;
+    if (ratio >= 1) {
+      this.goalMeter.classList.add("complete");
+      if (wasIncomplete) {
+        // Replay the flash animation on the moment of completion.
+        this.goalMeter.classList.remove("complete");
+        void this.goalMeter.offsetWidth;
+        this.goalMeter.classList.add("complete");
+      }
+    } else {
+      this.goalMeter.classList.remove("complete");
+    }
+    this.lastGoalRatio = ratio;
   }
 
   setSteps(n: number) {

@@ -78,6 +78,7 @@ let lastError: { line: number; message: string } | null = null;
 
 renderHud();
 hud.setLevel(world.level);
+hud.setGoalProgress(world);
 muteBtn.textContent = audio.muted ? "SOUND OFF" : "SOUND ON";
 muteBtn.setAttribute("aria-pressed", audio.muted ? "true" : "false");
 
@@ -155,6 +156,7 @@ function selectLevel(id: number) {
   editor.setCode(loadCode(id));
   editor.setExecutingLine(null);
   hud.setLevel(world.level);
+  hud.setGoalProgress(world);
   hoot.hide();
   lastError = null;
   renderHud();
@@ -167,6 +169,7 @@ function resetLevel() {
   editor.setExecutingLine(null);
   hud.setStatus("Level reset.", "");
   hud.setSteps(0);
+  hud.setGoalProgress(world);
   hoot.hide();
   lastError = null;
 }
@@ -204,7 +207,10 @@ async function runProgram() {
       world,
       engine,
       signal: ctrl.signal,
-      onStep: () => hud.setSteps(world.steps),
+      onStep: () => {
+        hud.setSteps(world.steps);
+        hud.setGoalProgress(world);
+      },
       onLine: (line) => editor.setExecutingLine(line),
     });
     if (result.win) {
