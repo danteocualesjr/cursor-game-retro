@@ -7,6 +7,7 @@ import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
+import { fireConfetti } from "./ui/confetti";
 import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
@@ -264,11 +265,15 @@ function onWin() {
   }
   saveProgress(progress);
   renderHud();
-  document.querySelector(".game-pane")?.classList.add("win-flash");
-  setTimeout(
-    () => document.querySelector(".game-pane")?.classList.remove("win-flash"),
-    700,
-  );
+  const gamePane = document.querySelector<HTMLElement>(".game-pane");
+  gamePane?.classList.add("win-flash");
+  setTimeout(() => gamePane?.classList.remove("win-flash"), 700);
+  // 3-star solves get a denser, longer burst so the kid feels the
+  // "perfect run" reward distinctly. 1- and 2-star wins still confetti
+  // but more lightly.
+  const burstCount = stars === 3 ? 60 : stars === 2 ? 40 : 28;
+  const burstMs = stars === 3 ? 1800 : 1400;
+  fireConfetti({ count: burstCount, durationMs: burstMs, anchor: gamePane });
   const starWord =
     stars === 3 ? "Three stars! Optimal!" : stars === 2 ? "Two stars - try shaving a few steps." : "One star - can you do it in fewer steps?";
   const next = LEVELS.find((l) => l.id === currentLevelId + 1);

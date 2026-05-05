@@ -1178,6 +1178,40 @@ body::after {
 
 .onboarding-actions .btn { min-width: 140px; }
 
+/* ---------- CONFETTI ---------- */
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 90;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -16px;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: var(--c);
+  /* Pixel squares - no border-radius, no soft shadows. */
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+  animation: confetti-fall var(--dur) ease-in var(--delay) forwards;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translate3d(var(--drift), 110vh, 0) rotate(var(--rotate));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti { display: none; }
+}
+
 /* ---------- WIN OVERLAY ---------- */
 
 .win-flash {
