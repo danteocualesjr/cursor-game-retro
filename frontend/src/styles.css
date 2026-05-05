@@ -637,6 +637,48 @@ body::after {
   color: var(--c-text-dim);
 }
 
+.timer {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--c-panel-light);
+  border: 2px solid var(--c-accent-2);
+  padding: 4px 10px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  color: var(--c-text-dim);
+}
+
+.timer-label {
+  color: var(--c-accent-2);
+  letter-spacing: 1px;
+}
+
+.timer-value {
+  color: var(--c-text);
+  font-size: 12px;
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer.running {
+  border-color: var(--c-accent);
+}
+
+.timer.running .timer-label {
+  color: var(--c-accent);
+}
+
+.timer.best {
+  border-color: var(--c-good);
+}
+
+.timer.best .timer-label,
+.timer.best .timer-value {
+  color: var(--c-good);
+}
+
 .steps-label {
   color: var(--c-accent);
   letter-spacing: 1px;

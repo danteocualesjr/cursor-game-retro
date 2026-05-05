@@ -10,6 +10,11 @@ export class Hud {
   private stepsValue: HTMLElement;
   private goalMeter: HTMLElement;
   private goalMeterValue: HTMLElement;
+  private timerBox: HTMLElement;
+  private timerValue: HTMLElement;
+  private timerRaf: number | null = null;
+  private timerStart = 0;
+  private timerPaused = 0;
   private bumpTimer: number | null = null;
   private lastSteps = 0;
   private lastGoalRatio = -1;
@@ -24,6 +29,58 @@ export class Hud {
     this.stepsValue = mustEl("#stepsValue");
     this.goalMeter = mustEl("#goalMeter");
     this.goalMeterValue = mustEl("#goalMeterValue");
+    this.timerBox = mustEl("#timer");
+    this.timerValue = mustEl("#timerValue");
+  }
+
+  /** Start the speedrun timer. Idempotent - if already running, no-op. */
+  startTimer() {
+    if (this.timerRaf !== null) return;
+    this.timerStart = performance.now() - this.timerPaused;
+    this.timerBox.classList.add("running");
+    this.timerBox.classList.remove("best");
+    const tick = () => {
+      const elapsed = performance.now() - this.timerStart;
+      this.renderTime(elapsed);
+      this.timerRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  /** Stop the timer and return its final reading in milliseconds. */
+  stopTimer(): number {
+    if (this.timerRaf !== null) {
+      cancelAnimationFrame(this.timerRaf);
+      this.timerRaf = null;
+    }
+    this.timerBox.classList.remove("running");
+    if (this.timerStart === 0) return 0;
+    const elapsed = performance.now() - this.timerStart;
+    this.timerPaused = elapsed;
+    this.renderTime(elapsed);
+    return Math.round(elapsed);
+  }
+
+  /** Reset the timer to 0.0s. */
+  resetTimer() {
+    if (this.timerRaf !== null) {
+      cancelAnimationFrame(this.timerRaf);
+      this.timerRaf = null;
+    }
+    this.timerStart = 0;
+    this.timerPaused = 0;
+    this.timerBox.classList.remove("running", "best");
+    this.renderTime(0);
+  }
+
+  /** Mark the current frozen time as a new personal best. */
+  flagTimerBest() {
+    this.timerBox.classList.add("best");
+  }
+
+  private renderTime(ms: number) {
+    const secs = ms / 1000;
+    this.timerValue.textContent = `${secs.toFixed(1)}s`;
   }
 
   /** Wire the click-to-insert behavior of the command chips. */
@@ -153,6 +210,7 @@ export class Hud {
     stars: Record<number, number>,
     bestSteps: Record<number, number>,
     onPick: (id: number) => void,
+    bestTimeMs: Record<number, number> = {},
   ) {
     this.pillBox.innerHTML = "";
     for (const lvl of levels) {
@@ -166,12 +224,14 @@ export class Hud {
       btn.textContent = String(lvl.id);
       const earnedStars = stars[lvl.id] ?? 0;
       const best = bestSteps[lvl.id];
-      const tooltipParts = [
-        `${lvl.name} - par ${lvl.parSteps} steps`,
+      const bestTime = bestTimeMs[lvl.id];
+      const bestSummary =
         best !== undefined
-          ? `Your best: ${best} steps (${earnedStars}/3 stars)`
-          : "Not solved yet",
-      ];
+          ? `Your best: ${best} steps${
+              bestTime !== undefined ? `, ${(bestTime / 1000).toFixed(1)}s` : ""
+            } (${earnedStars}/3 stars)`
+          : "Not solved yet";
+      const tooltipParts = [`${lvl.name} - par ${lvl.parSteps} steps`, bestSummary];
       btn.title = tooltipParts.join("\n");
       btn.addEventListener("click", () => onPick(lvl.id));
       wrap.appendChild(btn);
@@ -191,7 +251,10 @@ export class Hud {
         bestLabel.className = "level-pill-best";
         bestLabel.textContent = `${best}`;
         bestLabel.setAttribute("aria-label", `best: ${best} steps`);
-        bestLabel.title = `Best: ${best} steps (par ${lvl.parSteps})`;
+        bestLabel.title =
+          bestTime !== undefined
+            ? `Best: ${best} steps, ${(bestTime / 1000).toFixed(1)}s (par ${lvl.parSteps})`
+            : `Best: ${best} steps (par ${lvl.parSteps})`;
         wrap.appendChild(bestLabel);
       }
 

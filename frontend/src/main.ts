@@ -25,6 +25,8 @@ interface Progress {
   stars?: Record<number, number>;
   /** Best (lowest) step count achieved per level id. */
   bestSteps?: Record<number, number>;
+  /** Best (lowest) wall-clock solve time in milliseconds per level id. */
+  bestTimeMs?: Record<number, number>;
 }
 
 function loadProgress(): Progress {
@@ -34,12 +36,13 @@ function loadProgress(): Progress {
       const p = JSON.parse(raw) as Progress;
       p.stars ??= {};
       p.bestSteps ??= {};
+      p.bestTimeMs ??= {};
       return p;
     }
   } catch {
     /* fall through */
   }
-  return { solved: [], current: 1, stars: {}, bestSteps: {} };
+  return { solved: [], current: 1, stars: {}, bestSteps: {}, bestTimeMs: {} };
 }
 
 function starsForSteps(steps: number, par: number): number {
@@ -150,6 +153,7 @@ function renderHud() {
       if (id === currentLevelId) return;
       selectLevel(id);
     },
+    progress.bestTimeMs ?? {},
   );
 }
 
@@ -165,6 +169,7 @@ function selectLevel(id: number) {
   editor.setExecutingLine(null);
   hud.setLevel(world.level);
   hud.setGoalProgress(world);
+  hud.resetTimer();
   hoot.hide();
   lastError = null;
   renderHud();
@@ -178,6 +183,7 @@ function resetLevel() {
   hud.setStatus("Level reset.", "");
   hud.setSteps(0);
   hud.setGoalProgress(world);
+  hud.resetTimer();
   hoot.hide();
   lastError = null;
 }
@@ -206,6 +212,7 @@ async function runProgram() {
 
   setRunning(true);
   hud.setStatus("Running...", "");
+  hud.startTimer();
   hoot.hide();
   const ctrl = new AbortController();
   runAbort = ctrl;
@@ -251,13 +258,19 @@ function resetWorldOnly() {
 
 function onWin() {
   audio.win();
+  const elapsedMs = hud.stopTimer();
   const par = world.level.parSteps;
   const stars = starsForSteps(world.steps, par);
   const starGlyphs = "*".repeat(stars) + ".".repeat(3 - stars);
-  hud.setStatus(`Solved in ${world.steps} steps! ${starGlyphs}`, "good");
+  const elapsedS = (elapsedMs / 1000).toFixed(1);
+  hud.setStatus(
+    `Solved in ${world.steps} steps, ${elapsedS}s! ${starGlyphs}`,
+    "good",
+  );
 
   progress.stars ??= {};
   progress.bestSteps ??= {};
+  progress.bestTimeMs ??= {};
   // Capture this BEFORE we mutate progress.solved so we can decide
   // whether to pop the example-solution modal.
   const wasFirstSolve = !progress.solved.includes(currentLevelId);
@@ -270,6 +283,13 @@ function onWin() {
   if (prevBest === undefined || world.steps < prevBest) {
     progress.bestSteps[currentLevelId] = world.steps;
   }
+  const prevBestTime = progress.bestTimeMs[currentLevelId];
+  let beatBestTime = false;
+  if (elapsedMs > 0 && (prevBestTime === undefined || elapsedMs < prevBestTime)) {
+    progress.bestTimeMs[currentLevelId] = elapsedMs;
+    beatBestTime = true;
+  }
+  if (beatBestTime) hud.flagTimerBest();
   saveProgress(progress);
   renderHud();
   const gamePane = document.querySelector<HTMLElement>(".game-pane");
