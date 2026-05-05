@@ -673,6 +673,49 @@ body::after {
   padding: 8px 12px;
   font-size: 14px;
   color: var(--c-text-dim);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.code-header-cmds {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-tidy {
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 6px 10px;
+  background: var(--c-panel-light);
+  color: var(--c-accent-2);
+  border: 2px solid var(--c-accent-2);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  box-shadow: 0 2px 0 var(--c-bg-deep);
+  transition: transform 60ms ease, box-shadow 60ms ease;
+}
+
+.btn-tidy:hover {
+  background: var(--c-accent-2);
+  color: var(--c-bg-deep);
+  transform: translateY(-1px);
+}
+
+.btn-tidy:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--c-bg-deep);
+}
+
+.btn-tidy.flash {
+  animation: tidy-flash 600ms ease;
+}
+
+@keyframes tidy-flash {
+  0%, 100% { background: var(--c-panel-light); color: var(--c-accent-2); }
+  50% { background: var(--c-accent-2); color: var(--c-bg-deep); }
 }
 
 .cmds-label {

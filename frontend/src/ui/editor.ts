@@ -31,6 +31,7 @@ import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
 import { tags as t } from "@lezer/highlight";
 import { parse, ParseError } from "../game/interpreter";
 import { DSL_SNIPPETS, snippetFor } from "../game/dsl-snippets";
+import { formatDsl } from "../game/format";
 
 /**
  * Lint the buffer with the same parse() the runtime uses, so the kid sees
@@ -197,6 +198,24 @@ export class CodeEditor {
    *  pass null to clear. */
   setExecutingLine(line: number | null) {
     this.view.dispatch({ effects: setExecLine.of(line) });
+  }
+
+  /**
+   * Re-indent the buffer using two-space steps based on `{` / `}` nesting,
+   * after collapsing runs of blank lines and trimming trailing whitespace.
+   * Strings (single- or double-quoted) and `//` line comments are preserved
+   * verbatim so they don't trigger fake brace nesting.
+   *
+   * Returns true if the document changed, false if it was already tidy.
+   */
+  tidy(): boolean {
+    const before = this.getCode();
+    const after = formatDsl(before);
+    if (after === before) return false;
+    this.view.dispatch({
+      changes: { from: 0, to: this.view.state.doc.length, insert: after },
+    });
+    return true;
   }
 
   /**

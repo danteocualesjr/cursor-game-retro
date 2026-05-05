@@ -61,6 +61,7 @@ const hintBtn = document.getElementById("hintBtn") as HTMLButtonElement;
 const speedBtn = document.getElementById("speedBtn") as HTMLButtonElement;
 const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 const howBtn = document.getElementById("howBtn") as HTMLButtonElement;
+const tidyBtn = document.getElementById("tidyBtn") as HTMLButtonElement;
 
 const hud = new Hud();
 const hoot = new HootTutor();
@@ -93,6 +94,7 @@ resetBtn.addEventListener("click", () => resetLevel());
 hintBtn.addEventListener("click", () => askHoot());
 speedBtn.addEventListener("click", () => cycleSpeed());
 muteBtn.addEventListener("click", () => toggleMute());
+tidyBtn.addEventListener("click", () => tidyCode());
 
 window.addEventListener("keydown", (e) => {
   // Don't fire game shortcuts while a modal is open - Esc and Enter
@@ -353,6 +355,19 @@ async function askHootForError() {
 function toggleMute() {
   audio.setMuted(!audio.muted);
   reflectMuteButton();
+}
+
+function tidyCode() {
+  // Don't reformat while a program is running - the code is locked anyway,
+  // but bail explicitly so we don't clobber the in-flight code highlight.
+  if (runAbort) return;
+  const changed = editor.tidy();
+  // A tiny visual confirmation either way: flash the button so the click
+  // feels acknowledged even when there was nothing to fix.
+  tidyBtn.classList.remove("flash");
+  void tidyBtn.offsetWidth;
+  tidyBtn.classList.add("flash");
+  hud.setStatus(changed ? "Tidied code." : "Already tidy.", "");
 }
 
 function reflectMuteButton() {

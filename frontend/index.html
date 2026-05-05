@@ -79,8 +79,17 @@
 
         <section class="code-pane" aria-label="Code editor and controls">
           <div class="code-header">
-            <span class="cmds-label" aria-hidden="true">Available commands:</span>
-            <span class="cmds-list" id="cmdsList" aria-label="Commands available on this level"></span>
+            <div class="code-header-cmds">
+              <span class="cmds-label" aria-hidden="true">Available commands:</span>
+              <span class="cmds-list" id="cmdsList" aria-label="Commands available on this level"></span>
+            </div>
+            <button
+              id="tidyBtn"
+              class="btn-tidy"
+              type="button"
+              title="Re-indent your code (does not change behavior)"
+              aria-label="Tidy code formatting"
+            >TIDY</button>
           </div>
           <div id="editor" class="editor" aria-label="Code editor (Ctrl+Enter to run)"></div>
           <div class="controls">
