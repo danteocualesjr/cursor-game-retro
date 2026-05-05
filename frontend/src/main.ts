@@ -308,8 +308,24 @@ function trimMessage(msg: string): string {
   return msg.replace(/^Line \d+:\s*/, "");
 }
 
+/* Show/clear the HINT button's loading state while a tutor request is
+   in flight. We disable the button so impatient mashing can't stack
+   requests and rate-limit the player out, set aria-busy for screen
+   readers, and the CSS picks up the .hint-dots animation. */
+function setHintLoading(loading: boolean) {
+  hintBtn.setAttribute("aria-busy", loading ? "true" : "false");
+  hintBtn.disabled = loading;
+  if (loading) {
+    hintBtn.classList.add("loading");
+  } else {
+    hintBtn.classList.remove("loading");
+  }
+}
+
 async function askHoot() {
+  if (hintBtn.getAttribute("aria-busy") === "true") return;
   audio.ensure();
+  setHintLoading(true);
   hoot.show("Hoot is thinking...", { thinking: true, sticky: true });
   try {
     const res = await requestHint({
@@ -328,11 +344,15 @@ async function askHoot() {
         : "Hoot can't think right now.",
       { sticky: false },
     );
+  } finally {
+    setHintLoading(false);
   }
 }
 
 async function askHootForError() {
   if (!lastError) return;
+  if (hintBtn.getAttribute("aria-busy") === "true") return;
+  setHintLoading(true);
   hoot.show("Hoot is reading your code...", { thinking: true, sticky: true });
   try {
     const res = await explainError({
@@ -349,6 +369,8 @@ async function askHootForError() {
         : "Hoot is silent.",
       { sticky: false },
     );
+  } finally {
+    setHintLoading(false);
   }
 }
 

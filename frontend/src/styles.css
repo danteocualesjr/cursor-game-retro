@@ -942,6 +942,41 @@ body::after {
     0 4px 0 var(--c-bg-deep);
 }
 
+/* Loading state: three pixel dots cycle on after the HINT label
+   while the request is in flight. Reliable across browsers - we
+   stagger opacity, not the `content` property. */
+.hint-dots {
+  display: none;
+  margin-left: 4px;
+  letter-spacing: 1px;
+}
+
+.btn-hint[aria-busy="true"] .hint-dots {
+  display: inline;
+}
+
+.btn-hint[aria-busy="true"] .hint-dots span {
+  display: inline-block;
+  opacity: 0;
+  animation: hint-dot-blink 900ms ease-in-out infinite;
+}
+
+.btn-hint[aria-busy="true"] .hint-dots span:nth-child(2) {
+  animation-delay: 150ms;
+}
+.btn-hint[aria-busy="true"] .hint-dots span:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes hint-dot-blink {
+  0%, 60%, 100% { opacity: 0; }
+  30% { opacity: 1; }
+}
+
+.btn-hint[aria-busy="true"] {
+  cursor: wait;
+}
+
 /* ---------- GLYPH BUTTONS (sound/speed) ---------- */
 
 .btn-icon {

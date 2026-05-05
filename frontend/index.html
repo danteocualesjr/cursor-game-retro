@@ -95,7 +95,12 @@
           <div class="controls">
             <button id="runBtn" class="btn btn-primary" aria-keyshortcuts="Control+Enter Meta+Enter">RUN</button>
             <button id="resetBtn" class="btn">RESET</button>
-            <button id="hintBtn" class="btn btn-hint">HINT</button>
+            <button id="hintBtn" class="btn btn-hint" aria-busy="false">
+              <span class="hint-label" id="hintLabel">HINT</span><span
+                class="hint-dots"
+                aria-hidden="true"
+              ><span>.</span><span>.</span><span>.</span></span>
+            </button>
             <button
               id="speedBtn"
               class="btn btn-icon btn-speed"
