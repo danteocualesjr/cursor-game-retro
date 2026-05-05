@@ -7,6 +7,7 @@ import { CodeEditor } from "./ui/editor";
 import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
+import { ExampleModal } from "./ui/example-modal";
 import { fireConfetti } from "./ui/confetti";
 import { flyStars } from "./ui/star-flyin";
 import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
@@ -102,7 +103,9 @@ window.addEventListener("keydown", (e) => {
   // Don't fire game shortcuts while a modal is open - Esc and Enter
   // belong to the dialog in that case.
   const onboardingEl = document.getElementById("onboarding");
+  const exampleEl = document.getElementById("exampleModal");
   if (onboardingEl && !onboardingEl.hidden) return;
+  if (exampleEl && !exampleEl.hidden) return;
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
     if (runAbort) stopProgram();
@@ -255,7 +258,10 @@ function onWin() {
 
   progress.stars ??= {};
   progress.bestSteps ??= {};
-  if (!progress.solved.includes(currentLevelId)) {
+  // Capture this BEFORE we mutate progress.solved so we can decide
+  // whether to pop the example-solution modal.
+  const wasFirstSolve = !progress.solved.includes(currentLevelId);
+  if (wasFirstSolve) {
     progress.solved.push(currentLevelId);
   }
   const prevStars = progress.stars[currentLevelId] ?? 0;
@@ -283,6 +289,16 @@ function onWin() {
       .querySelector<HTMLElement>(".level-pill.current")
       ?.parentElement;
     if (wrap) flyStars({ count: newStars, source: gamePane, destWrap: wrap });
+  }
+  // First-solve teaching moment: after the win effects have a chance to
+  // play, surface the canonical solution as a modal. Once-per-level via
+  // localStorage; the player won't see it again on replays.
+  if (wasFirstSolve) {
+    setTimeout(
+      () =>
+        exampleModal.showIfFirstTime(currentLevelId, world.level.exampleSolution),
+      1900,
+    );
   }
   const starWord =
     stars === 3 ? "Three stars! Optimal!" : stars === 2 ? "Two stars - try shaving a few steps." : "One star - can you do it in fewer steps?";
@@ -563,6 +579,13 @@ hoot.hide();
 const onboarding = new Onboarding();
 howBtn.addEventListener("click", () => onboarding.open(howBtn));
 onboarding.showIfFirstTime();
+
+const exampleModal = new ExampleModal({
+  onLoad: (code) => {
+    editor.setCode(code);
+    hud.setStatus("Example loaded. RUN to watch it play.", "");
+  },
+});
 
 void refreshTutorHealth();
 

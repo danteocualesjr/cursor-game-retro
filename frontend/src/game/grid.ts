@@ -48,6 +48,10 @@ export interface LevelSpec {
   goal: GoalSpec;
   /** Hand-tuned ideal step count. <= par = 3 stars, <= par*1.5 = 2 stars, else 1. */
   parSteps: number;
+  /** Canonical solution shown to the player after their first solve. Should
+   *  be a clean, idiomatic answer the kid can read and learn from - not the
+   *  shortest-possible code-golf solution. */
+  exampleSolution: string;
 }
 
 export interface World {

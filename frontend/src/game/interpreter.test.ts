@@ -40,6 +40,7 @@ function level(grid: string, goal: LevelSpec["goal"], opts: Partial<LevelSpec> =
     grid,
     goal,
     parSteps: 1,
+    exampleSolution: "",
     ...opts,
   };
 }

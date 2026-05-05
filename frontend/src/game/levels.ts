@@ -15,6 +15,7 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "reach", x: 6, y: 1 },
     parSteps: 5,
+    exampleSolution: "// Walk five tiles to the goal.\nmove(5);\n",
   },
   {
     id: 2,
@@ -34,6 +35,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "reach", x: 5, y: 4 },
     parSteps: 8,
+    exampleSolution:
+      "// Walk forward, turn the corner, walk again.\nmove(4);\nturnRight();\nmove(3);\n",
   },
   {
     id: 3,
@@ -55,6 +58,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "reach", x: 6, y: 6 },
     parSteps: 24,
+    exampleSolution:
+      "// Each side of the loop is the same: walk 5, turn right.\nrepeat(4) {\n  move(5);\n  turnRight();\n}\n",
   },
   {
     id: 4,
@@ -71,6 +76,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "collect-all" },
     parSteps: 9,
+    exampleSolution:
+      "// Walk the row; if a gem is under your feet, pick it up.\nrepeat(6) {\n  move(1);\n  if (here(\"gem\")) {\n    pickUp();\n  }\n}\n",
   },
   {
     id: 5,
@@ -89,6 +96,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "switches" },
     parSteps: 3,
+    exampleSolution:
+      "// Push the crate three tiles onto the switch.\nrepeat(3) {\n  push();\n}\n",
   },
   {
     id: 6,
@@ -112,6 +121,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "collect-all" },
     parSteps: 16,
+    exampleSolution:
+      "// One walk, one peek, one pickup - eleven times.\nrepeat(11) {\n  move(1);\n  if (here(\"gem\")) {\n    pickUp();\n  }\n}\n",
   },
   {
     id: 7,
@@ -136,6 +147,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "defeat-all" },
     parSteps: 3,
+    exampleSolution:
+      "// Two pushes squish the slime; then walk to the goal.\npush();\npush();\nmove(2);\n",
   },
   {
     id: 8,
@@ -166,6 +179,8 @@ export const LEVELS: LevelSpec[] = [
     ].join("\n"),
     goal: { kind: "collect-all" },
     parSteps: 32,
+    exampleSolution:
+      "// Snake through the maze: row 1, drop down, row 3, drop down, row 5.\nrepeat(7) {\n  move(1);\n  if (here(\"gem\")) { pickUp(); }\n}\nturnRight();\nmove(2);\nturnRight();\nrepeat(7) {\n  move(1);\n  if (here(\"gem\")) { pickUp(); }\n}\nturnLeft();\nmove(2);\nturnLeft();\nrepeat(8) {\n  move(1);\n  if (here(\"gem\")) { pickUp(); }\n}\n",
   },
 ];
 
