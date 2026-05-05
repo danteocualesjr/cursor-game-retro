@@ -76,6 +76,7 @@ applySpeed(speed);
 let runAbort: AbortController | null = null;
 let lastError: { line: number; message: string } | null = null;
 
+hud.setCmdInsertHandler((name) => editor.insertSnippet(name));
 renderHud();
 hud.setLevel(world.level);
 hud.setGoalProgress(world);

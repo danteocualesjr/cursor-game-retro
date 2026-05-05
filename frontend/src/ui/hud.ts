@@ -1,4 +1,5 @@
 import type { LevelSpec, World } from "../game/grid";
+import { snippetFor } from "../game/dsl-snippets";
 
 export class Hud {
   private objective: HTMLElement;
@@ -12,6 +13,7 @@ export class Hud {
   private bumpTimer: number | null = null;
   private lastSteps = 0;
   private lastGoalRatio = -1;
+  private onCmdInsert: ((name: string) => void) | null = null;
 
   constructor() {
     this.objective = mustEl("#objective");
@@ -24,14 +26,36 @@ export class Hud {
     this.goalMeterValue = mustEl("#goalMeterValue");
   }
 
+  /** Wire the click-to-insert behavior of the command chips. */
+  setCmdInsertHandler(fn: (name: string) => void) {
+    this.onCmdInsert = fn;
+  }
+
   setLevel(level: LevelSpec) {
     this.objective.innerHTML = `<span class="label">LEVEL ${level.id} - ${level.name.toUpperCase()}</span>${escapeHtml(
       level.intro,
     )}`;
-    this.cmds.textContent = level.allowedCommands.join(", ");
+    this.renderCmdChips(level.allowedCommands);
     this.setStatus("");
     this.setSteps(0);
     this.lastGoalRatio = -1;
+  }
+
+  private renderCmdChips(commands: ReadonlyArray<string>) {
+    this.cmds.innerHTML = "";
+    for (const name of commands) {
+      const snip = snippetFor(name);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cmd-chip";
+      btn.classList.add(`cmd-chip-${snip?.kind ?? "function"}`);
+      btn.textContent = name;
+      btn.title = snip
+        ? `${snip.detail} - ${snip.info}\n(click to insert)`
+        : `Insert ${name}`;
+      btn.addEventListener("click", () => this.onCmdInsert?.(name));
+      this.cmds.appendChild(btn);
+    }
   }
 
   /** Recompute and render the live goal-progress meter. */

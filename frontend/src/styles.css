@@ -557,6 +557,44 @@ body {
   font-family: var(--font-mono);
   font-size: 16px;
   color: var(--c-text);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+.cmd-chip {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--c-panel-light);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
+  padding: 1px 8px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  user-select: none;
+  transition: transform 60ms ease, background 100ms ease;
+}
+
+.cmd-chip:hover {
+  background: var(--c-border);
+  transform: translateY(-1px);
+}
+
+.cmd-chip:active {
+  transform: translateY(0);
+}
+
+.cmd-chip-keyword {
+  color: var(--c-accent-2);
+}
+
+.cmd-chip-sensor {
+  color: var(--c-good);
+}
+
+.cmd-chip-function {
+  color: var(--c-accent);
 }
 
 .editor {
