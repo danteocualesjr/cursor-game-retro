@@ -10,6 +10,9 @@ import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
 import { ExampleModal } from "./ui/example-modal";
 import { HeroPicker, loadHero } from "./ui/hero-picker";
+import { AchievementModal } from "./ui/achievement-modal";
+import { fireAchievementToast } from "./ui/achievement-toast";
+import { evaluateAchievements } from "./game/achievements";
 import { fireConfetti } from "./ui/confetti";
 import { flyStars } from "./ui/star-flyin";
 import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
@@ -71,6 +74,9 @@ const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 const howBtn = document.getElementById("howBtn") as HTMLButtonElement;
 const tidyBtn = document.getElementById("tidyBtn") as HTMLButtonElement;
 const heroBtn = document.getElementById("heroBtn") as HTMLButtonElement;
+const achievementsBtn = document.getElementById(
+  "achievementsBtn",
+) as HTMLButtonElement | null;
 
 const hud = new Hud();
 const hoot = new HootTutor();
@@ -129,9 +135,11 @@ window.addEventListener("keydown", (e) => {
   const onboardingEl = document.getElementById("onboarding");
   const exampleEl = document.getElementById("exampleModal");
   const heroEl = document.getElementById("heroPicker");
+  const achievementsEl = document.getElementById("achievementsModal");
   if (onboardingEl && !onboardingEl.hidden) return;
   if (exampleEl && !exampleEl.hidden) return;
   if (heroEl && !heroEl.hidden) return;
+  if (achievementsEl && !achievementsEl.hidden) return;
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
     if (runAbort) stopProgram();
@@ -252,7 +260,7 @@ async function runProgram() {
       onLine: (line) => editor.setExecutingLine(line),
     });
     if (result.win) {
-      onWin();
+      onWin(program);
     } else if (result.errorLine !== undefined) {
       lastError = { line: result.errorLine, message: result.message };
       hud.setStatus(`Line ${result.errorLine}: ${trimMessage(result.message)}`, "bad");
@@ -279,7 +287,7 @@ function resetWorldOnly() {
   engine.setWorld(world);
 }
 
-function onWin() {
+function onWin(program: import("./game/interpreter").Stmt[]) {
   audio.win();
   const elapsedMs = hud.stopTimer();
   const par = world.level.parSteps;
@@ -314,6 +322,21 @@ function onWin() {
   }
   if (beatBestTime) hud.flagTimerBest();
   saveProgress(progress);
+
+  // Evaluate achievements against the post-win progress snapshot, then
+  // fire a toast for each newly-unlocked badge (slight stagger so they
+  // don't all spawn on the exact same frame).
+  const newlyUnlocked = evaluateAchievements({
+    levelId: currentLevelId,
+    timeMs: elapsedMs,
+    stars,
+    starsByLevel: progress.stars ?? {},
+    program,
+  });
+  newlyUnlocked.forEach((id, i) => {
+    setTimeout(() => fireAchievementToast(id), 600 + i * 350);
+  });
+
   renderHud();
   const gamePane = document.querySelector<HTMLElement>(".game-pane");
   gamePane?.classList.add("win-flash");
@@ -637,6 +660,11 @@ const heroPicker = new HeroPicker({
   },
 });
 heroBtn.addEventListener("click", () => heroPicker.open(heroBtn));
+
+const achievementModal = new AchievementModal();
+achievementsBtn?.addEventListener("click", () =>
+  achievementModal.open(achievementsBtn),
+);
 
 void refreshTutorHealth();
 

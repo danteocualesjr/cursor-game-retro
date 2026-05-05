@@ -153,6 +153,12 @@
           </svg>
           <span>Hero</span>
         </button>
+        <button id="achievementsBtn" class="footer-link" type="button" aria-label="View achievements">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <polygon points="8,1 10,6 15,6.5 11,10 12,15 8,12.5 4,15 5,10 1,6.5 6,6" fill="currentColor"/>
+          </svg>
+          <span>Achievements</span>
+        </button>
       </footer>
     </div>
 
@@ -204,6 +210,26 @@
           <button id="onboardingClose" class="btn btn-primary" type="button">
             LET'S CODE
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="achievementsModal"
+      class="onboarding"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="achievementsTitle"
+      hidden
+    >
+      <div class="onboarding-backdrop" data-dismiss="true"></div>
+      <div class="onboarding-card achievements-card">
+        <h2 id="achievementsTitle" class="onboarding-title">Achievements</h2>
+        <div class="onboarding-body">
+          <div id="achievementsList" class="achievement-list"></div>
+        </div>
+        <div class="onboarding-actions">
+          <button id="achievementsClose" class="btn btn-primary" type="button">CLOSE</button>
         </div>
       </div>
     </div>
