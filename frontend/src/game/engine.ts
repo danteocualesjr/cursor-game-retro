@@ -48,6 +48,9 @@ export class Engine {
   pickupFlashes: { x: number; y: number; color: string; t0: number }[] = [];
   defeatFlashes: { x: number; y: number; t0: number }[] = [];
   speed = 1; // multiplier
+  /** Optional hero-tunic color override; falls back to PALETTE.heroTunic
+   *  when null. Set via setHeroTunic() from the hero customization UI. */
+  private heroTunicOverride: string | null = null;
   private rafId = 0;
   private resizeObserver: ResizeObserver | null = null;
 
@@ -73,6 +76,11 @@ export class Engine {
 
   setSpeed(mult: number) {
     this.speed = mult;
+  }
+
+  /** Override the hero's tunic color; pass null to fall back to default. */
+  setHeroTunic(color: string | null) {
+    this.heroTunicOverride = color;
   }
 
   destroy() {
@@ -432,7 +440,7 @@ export class Engine {
     const cx = px + TILE / 2;
     const bob = Math.sin(now / 180) * 1;
 
-    ctx.fillStyle = PALETTE.heroTunic;
+    ctx.fillStyle = this.heroTunicOverride ?? PALETTE.heroTunic;
     ctx.fillRect(px + 8, py + 14 + bob, TILE - 16, 12);
 
     ctx.fillStyle = PALETTE.hero;

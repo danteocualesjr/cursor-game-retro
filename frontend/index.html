@@ -144,6 +144,15 @@
           </svg>
           <span>How to play</span>
         </button>
+        <button id="heroBtn" class="footer-link" type="button" aria-label="Choose your hero color">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="6" y="2" width="4" height="4" fill="currentColor"/>
+            <rect x="4" y="6" width="8" height="6" fill="currentColor"/>
+            <rect x="3" y="12" width="3" height="3" fill="currentColor"/>
+            <rect x="10" y="12" width="3" height="3" fill="currentColor"/>
+          </svg>
+          <span>Hero</span>
+        </button>
       </footer>
     </div>
 
@@ -195,6 +204,27 @@
           <button id="onboardingClose" class="btn btn-primary" type="button">
             LET'S CODE
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="heroPicker"
+      class="onboarding"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="heroPickerTitle"
+      hidden
+    >
+      <div class="onboarding-backdrop" data-dismiss="true"></div>
+      <div class="onboarding-card">
+        <h2 id="heroPickerTitle" class="onboarding-title">Choose your hero</h2>
+        <div class="onboarding-body">
+          <p>Pick a tunic color. Saved to this browser.</p>
+          <div class="hero-swatch-grid" id="heroPickerGrid" role="group" aria-label="Hero tunic colors"></div>
+        </div>
+        <div class="onboarding-actions">
+          <button id="heroPickerClose" class="btn btn-primary" type="button">DONE</button>
         </div>
       </div>
     </div>

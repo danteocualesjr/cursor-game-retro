@@ -8,6 +8,7 @@ import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
 import { ExampleModal } from "./ui/example-modal";
+import { HeroPicker, loadHero } from "./ui/hero-picker";
 import { fireConfetti } from "./ui/confetti";
 import { flyStars } from "./ui/star-flyin";
 import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
@@ -68,6 +69,7 @@ const speedBtn = document.getElementById("speedBtn") as HTMLButtonElement;
 const muteBtn = document.getElementById("muteBtn") as HTMLButtonElement;
 const howBtn = document.getElementById("howBtn") as HTMLButtonElement;
 const tidyBtn = document.getElementById("tidyBtn") as HTMLButtonElement;
+const heroBtn = document.getElementById("heroBtn") as HTMLButtonElement;
 
 const hud = new Hud();
 const hoot = new HootTutor();
@@ -76,6 +78,8 @@ const progress = loadProgress();
 let currentLevelId = progress.current;
 let world = buildWorld(levelById(currentLevelId));
 const engine = new Engine(canvas, world);
+// Apply the persisted hero color before any frame is drawn.
+engine.setHeroTunic(loadHero().tunic);
 const editor = new CodeEditor(editorEl, loadCode(currentLevelId));
 let speed: Speed = loadSpeed();
 applySpeed(speed);
@@ -107,8 +111,10 @@ window.addEventListener("keydown", (e) => {
   // belong to the dialog in that case.
   const onboardingEl = document.getElementById("onboarding");
   const exampleEl = document.getElementById("exampleModal");
+  const heroEl = document.getElementById("heroPicker");
   if (onboardingEl && !onboardingEl.hidden) return;
   if (exampleEl && !exampleEl.hidden) return;
+  if (heroEl && !heroEl.hidden) return;
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
     e.preventDefault();
     if (runAbort) stopProgram();
@@ -606,6 +612,14 @@ const exampleModal = new ExampleModal({
     hud.setStatus("Example loaded. RUN to watch it play.", "");
   },
 });
+
+const heroPicker = new HeroPicker({
+  onChange: (palette) => {
+    engine.setHeroTunic(palette.tunic);
+    hud.setStatus(`Hero color: ${palette.name}`, "");
+  },
+});
+heroBtn.addEventListener("click", () => heroPicker.open(heroBtn));
 
 void refreshTutorHealth();
 
