@@ -320,6 +320,28 @@ body::after {
     0 0 0 2px var(--c-bg-deep);
 }
 
+/* Pop animation when a flying star lands on a freshly-earned dot. */
+.star-dot-pop {
+  animation: star-dot-pop 380ms ease-out;
+}
+
+@keyframes star-dot-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(2.2); box-shadow: 0 0 0 4px var(--c-accent); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- STAR FLY-IN ---------- */
+
+.star-flyin {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  z-index: 95;
+  filter: drop-shadow(2px 2px 0 var(--c-bg-deep));
+}
+
 .level-pill-best {
   font-family: var(--font-pixel);
   font-size: 7px;

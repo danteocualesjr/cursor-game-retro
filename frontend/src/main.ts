@@ -8,6 +8,7 @@ import { HootTutor } from "./ui/tutor";
 import { Hud } from "./ui/hud";
 import { Onboarding } from "./ui/onboarding";
 import { fireConfetti } from "./ui/confetti";
+import { flyStars } from "./ui/star-flyin";
 import { explainError, getHealth, HintRateLimitError, requestHint } from "./api";
 
 const STORAGE_KEY = "codequest:progress";
@@ -274,6 +275,15 @@ function onWin() {
   const burstCount = stars === 3 ? 60 : stars === 2 ? 40 : 28;
   const burstMs = stars === 3 ? 1800 : 1400;
   fireConfetti({ count: burstCount, durationMs: burstMs, anchor: gamePane });
+  // Fly each newly-earned star from the canvas center to its dot in the
+  // level pill - skipped if reduced motion is on.
+  const newStars = stars - prevStars;
+  if (newStars > 0 && gamePane) {
+    const wrap = document
+      .querySelector<HTMLElement>(".level-pill.current")
+      ?.parentElement;
+    if (wrap) flyStars({ count: newStars, source: gamePane, destWrap: wrap });
+  }
   const starWord =
     stars === 3 ? "Three stars! Optimal!" : stars === 2 ? "Two stars - try shaving a few steps." : "One star - can you do it in fewer steps?";
   const next = LEVELS.find((l) => l.id === currentLevelId + 1);
