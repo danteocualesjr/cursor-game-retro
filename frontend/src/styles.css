@@ -408,6 +408,113 @@ body::after {
   }
 }
 
+/* ---------- MOBILE / TOUCH POLISH ---------- */
+
+@media (max-width: 720px) {
+  #app {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  /* Topbar collapses to a 2-row stack so the pills wrap below the
+     title instead of squishing the title to one column. */
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .title { font-size: 18px; letter-spacing: 2px; }
+  .title::after { display: none; }
+  .subtitle { font-size: 14px; }
+  .level-pills {
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  /* Canvas: let it use full width, drop the recess outline so we
+     don't waste pixels on chrome. */
+  #game {
+    border-width: 4px;
+    box-shadow: inset 0 0 0 2px var(--c-bg-deep), 0 4px 0 var(--c-bg-deep);
+  }
+
+  /* HUD stacks instead of side-by-side so 12px text isn't squeezed. */
+  .hud {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .hud-side {
+    align-items: flex-start;
+  }
+  .hud-pills {
+    justify-content: flex-start;
+  }
+  .status {
+    text-align: left;
+  }
+  .objective { font-size: 16px; }
+
+  /* Code-header wraps so the TIDY button can drop below the cmds. */
+  .code-header {
+    flex-wrap: wrap;
+    padding: 8px 10px;
+  }
+  .code-header-cmds {
+    width: 100%;
+  }
+  .btn-tidy {
+    margin-left: auto;
+  }
+
+  .editor { min-height: 220px; }
+  .editor .cm-editor { font-size: 18px; }
+
+  /* Controls: switch to a 3-column wrap so tap targets stay >=44px. */
+  .controls {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+  /* SOUND + SPEED drop onto a second row across both auto cells. */
+  #speedBtn, #muteBtn {
+    grid-column: span 1;
+  }
+  .btn {
+    padding: 14px 6px;
+    font-size: 11px;
+    /* Disable transform-driven hover on touch since hovering doesn't
+       happen and the slight upward shift causes a flicker on tap. */
+    transition: box-shadow 60ms ease;
+  }
+  .btn:hover { transform: none; }
+  .btn-icon { width: 100%; min-width: 0; height: 44px; }
+
+  /* Hoot bubble shouldn't crash into the right edge on a phone. */
+  .hoot {
+    bottom: 80px;
+    right: 12px;
+  }
+  .hoot-bubble { max-width: calc(100vw - 96px); font-size: 16px; }
+
+  /* Onboarding card fits the screen with breathing room. */
+  .onboarding-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  .onboarding-title { font-size: 12px; }
+  .onboarding-body { font-size: 16px; }
+  .onboarding-actions .btn { min-width: 0; flex: 1; }
+}
+
+/* Coarse-pointer (touch) devices regardless of viewport: kill hover
+   transforms so taps don't feel sticky. */
+@media (hover: none) {
+  .btn:hover,
+  .level-pill:hover,
+  .cmd-chip:hover {
+    transform: none;
+  }
+}
+
 /* ---------- GAME PANE ---------- */
 
 .game-pane {
